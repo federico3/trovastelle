@@ -1,0 +1,12 @@
+pandas
+numpy
+matplotlib
+adafruit_bno055
+adafruit_motorkit
+scipy
+skyfield
+pytz
+spktype01
+jplephem
+networkx
+
