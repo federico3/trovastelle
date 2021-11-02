@@ -1,8 +1,9 @@
+cython
 pandas
 numpy
 matplotlib
-adafruit_bno055
-adafruit_motorkit
+adafruit_circuitpython_bno055
+adafruit-circuitpython-motorkit
 scipy
 skyfield
 pytz
