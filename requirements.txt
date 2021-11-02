@@ -11,3 +11,4 @@ spktype01
 jplephem
 networkx
 spiceypy
+geomag
