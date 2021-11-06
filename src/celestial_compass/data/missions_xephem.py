@@ -1,0 +1,102 @@
+"""
+ Copyright 2021 by California Institute of Technology.  ALL RIGHTS RESERVED.
+ United  States  Government  sponsorship  acknowledged.   Any commercial use
+ must   be  negotiated  with  the  Office  of  Technology  Transfer  at  the
+ California Institute of Technology.
+ 
+ This software may be subject to  U.S. export control laws  and regulations.
+ By accepting this document,  the user agrees to comply  with all applicable
+ U.S. export laws and regulations.  User  has the responsibility  to  obtain
+ export  licenses,  or  other  export  authority  as may be required  before
+ exporting  such  information  to  foreign  countries or providing access to
+ foreign persons.
+ 
+ This  software  is a copy  and  may not be current.  The latest  version is
+ maintained by and may be obtained from the Mobility  and  Robotics  Sytstem
+ Section (347) at the Jet  Propulsion  Laboratory.   Suggestions and patches
+ are welcome and should be sent to the software's maintainer.
+ 
+"""
+
+""" 
+Data: `wget https://stuff.mit.edu/afs/athena/project/xephem/lib/catalogs/spacecraft.edb`
+
+```
+* VOYAGER 2 Launched: 08/22/1977 Last updated: 12/05/1989
+* Good from 08/22.58/1977 through 07/09.92/1979
+VOYAGER 2-1,e,4.83715,-33.0429,11.8339,3.63929,0.141964,0.724792,53.7867,09/13/1978,1950,0,0
+* Good from 07/09.92/1979 through 08/26.12/1981  (corrected 1/22/1997 VRH)
+VOYAGER 2-2,h,12/11.077/1978,2.58239,119.197,-9.17007,1.33782,5.02057,1950,0,0
+* Good from 08/26.12/1981 through 01/24.75/1986  (corrected 1/22/1997 VRH)
+VOYAGER 2-3,h,07/29.801/1981,2.66245,76.9535,112.261,3.44837,9.60542,1950,0,0
+* Good from 01/24.75/1986 through 03/13.09/1987  (corrected 1/22/1997 VRH)
+VOYAGER 2-4,h,11/25.008/1982,2.49478,-100.383,-46.0771,5.81736,14.40394,1950,0,0
+* Good from 03/13.09/1987 through 08/25/1989  (corrected 1/22/1997 VRH)
+VOYAGER 2-5,h,11/24.695/1982,2.49617,-100.376,-46.1063,5.8064,14.39968,1950,0,0
+* Good from 08/25/1989 through 12/31/2040  (corrected 1/22/1997 VRH)
+VOYAGER 2-6,h,04/30.224/1983,78.8189,100.935,130.058,6.2841,21.24042,1950,0,0
+* VOYAGER 1 Launched: 09/05/1977 Last updated: 12/05/1989
+* Good from 09/05.54/1977 through 03/05.5/1979
+VOYAGER 1-1,e,1.03547,-17.9821,-0.349381,4.99712,0.0882316,0.798528,31.6497,08/30/1978,1950,0,0
+* Good from 03/05.5/1979 through 11/13/1980  (corrected 1/22/1997 VRH)
+VOYAGER 1-2,h,11/28.764/1978,2.47979,112.913,-1.46534,2.29959,5.16622,1950,0,0
+* Good from 11/13/1980 through 01/01/2040  (corrected 1/22/1997 VRH)
+VOYAGER 1-3,h,12/18.497/1979,35.8006,178.355,-21.7477,3.72559,8.77808,1950,0,0
+```
+""" 
+
+import os
+from skyfield.api import Loader, wgs84
+from skyfield.vectorlib import VectorFunction
+from skyfield.constants import AU_KM
+import ephem
+
+from celestial_compass.observables import ObservableEphemSatellite, ObservableSkyObject
+
+DATA_PATH = os.environ.get("CELESTIAL_COMPASS_DATA")
+load = Loader(DATA_PATH)
+
+planets = load('de440.bsp')
+earth = planets['earth']
+
+ts = load.timescale()
+
+
+# Voyager
+voyager1_pyephem_raw = ephem.readdb("VOYAGER 1-3,h,12/18.497/1979,35.8006,178.355,-21.7477,3.72559,8.77808,1950,0,0")
+voyager2_pyephem_raw = ephem.readdb("VOYAGER 2-6,h,04/30.224/1983,78.8189,100.935,130.058,6.2841,21.24042,1950,0,0")
+
+voyager1_pyephem = ObservableEphemSatellite(
+    name='Voyager 1',
+    data=voyager1_pyephem_raw
+)
+voyager2_pyephem = ObservableEphemSatellite(
+    name='Voyager 2',
+    data=voyager2_pyephem_raw
+)
+
+# Juno
+# so, the SPKs for Juno are only in the past. https://naif.jpl.nasa.gov/pub/naif/pds/data/jno-j_e_ss-spice-6-v1.0/jnosp_1000/data/spk/spkinfo.txt
+# But Juno is close enough to Jupiter for the purposes of this project
+juno = planets['jupiter barycenter']
+
+# Mars probes
+# Likewise for our Mars probes
+curiosity = planets['mars barycenter']
+perseverance = planets['mars barycenter']
+ingenuity = planets['mars barycenter']
+insight = planets['mars barycenter']
+odyssey = planets['mars barycenter']
+
+
+
+missions = {
+    "Juno": juno,
+    "Curiosity": curiosity,
+    "Perseverance": perseverance,
+    "Ingenuity": ingenuity,
+    "InSight": insight,
+    "Mars Odyssey": odyssey,
+}
+
+ObservableMissions = [voyager1_pyephem, voyager2_pyephem] + [ObservableSkyObject(name=key, data=val) for key, val in missions.items()]
