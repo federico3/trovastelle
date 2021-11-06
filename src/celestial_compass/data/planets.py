@@ -18,7 +18,6 @@
  
 """
 
-# from skyfield.api import load
 from skyfield.api import Loader
 import os
 from celestial_compass.observables import ObservableSkyObject
@@ -26,8 +25,8 @@ from celestial_compass.observables import ObservableSkyObject
 DATA_PATH = os.environ.get("CELESTIAL_COMPASS_DATA")
 
 load = Loader(DATA_PATH)
-
 planets = load('de440.bsp')
+
 planet_names = [
     "Mercury",
     "Venus",
