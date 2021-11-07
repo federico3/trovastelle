@@ -23,6 +23,7 @@ from luma.core.interface.parallel import bitbang_6800
 from luma.core.render import canvas
 from luma.oled.device import ssd1306, ssd1309, ssd1325, ssd1331, sh1106, ws0010
 import os
+from PIL import ImageFont
 
 class DisplayController(object):
     def __init__(self):
@@ -30,18 +31,17 @@ class DisplayController(object):
 
         # substitute ssd1331(...) or sh1106(...) below if using that device
         self.device = ssd1309(serial)
-        self.font_name = font_name
         
     def display_text(self, text: str, font_name: str="LiberationSans-Regular.ttf", font_size: int=16):
         
         font = self.make_font(font_name, font_size)
         
-        with canvas(device) as draw:
-            draw.rectangle(device.bounding_box, outline="white", fill="black")
-            w, h = draw.textsize(text=_text, font=font)
-            left = (device.width - w) / 2
-            top = (device.height - h) / 2 
-            draw.text((left, top), text=_text, font=font, fill="white")
+        with canvas(self.device) as draw:
+            draw.rectangle(self.device.bounding_box, outline="white", fill="black")
+            w, h = draw.textsize(text=text, font=font)
+            left = (self.device.width - w) / 2
+            top = (self.device.height - h) / 2 
+            draw.text((left, top), text=text, font=font, fill="white")
             
     def make_font(self, name, size):
         DATA_PATH = os.environ.get("CELESTIAL_COMPASS_DATA")
