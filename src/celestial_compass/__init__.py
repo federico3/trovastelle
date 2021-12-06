@@ -17,4 +17,6 @@
  are welcome and should be sent to the software's maintainer.
  
 """
+from . import observables
+from . import data
 

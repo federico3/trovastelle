@@ -13,7 +13,7 @@ DATA_PATH = os.environ.get("CELESTIAL_COMPASS_DATA")
 load = Loader(DATA_PATH)
 
 class Observable(object):
-    def __init__(self, name, data, weight:float=1., color:list[float]=[1., 1., 1.], check_visible:bool=True):
+    def __init__(self, name, data, weight:float=1., color:list=[1., 1., 1.], check_visible:bool=True):
         self.name = name
         self.data = data
         self.weight = weight
@@ -39,7 +39,7 @@ class ObservableTerrestrialLocation(Observable):
         name: str,
         data: dict,
         weight:float=1.,
-        color:list[float]=[1., 1., 1.],
+        color:list=[1., 1., 1.],
         check_visible:bool=False
     ):
         self.name = name
@@ -87,7 +87,7 @@ class ObservableSkyObject(Observable):
         data: skyfield.jpllib.ChebyshevPosition,
         earth=None,
         weight:float=1.,
-        color:list[float]=[1., 1., 1.],
+        color:list=[1., 1., 1.],
         check_visible:bool=True,
     ):
         self.name = name
@@ -134,7 +134,7 @@ class ObservableSatellite(Observable):
         name: str,
         data: skyfield.sgp4lib.EarthSatellite,
         weight:float=1.,
-        color:list[float]=[1., 1., 1.],
+        color:list=[1., 1., 1.],
         check_visible:bool=True,
     ):
         self.name = name
@@ -169,6 +169,7 @@ class ObservableSatellite(Observable):
     def __repr__(self):
         return("Observable: {}\n{}".format(self.name,self.satellite))
     
+
 if EPHEM_AVAILABLE:
     class ObservableEphemSatellite(Observable):
         def __init__(

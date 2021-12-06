@@ -11,4 +11,8 @@ spktype01
 jplephem
 networkx
 spiceypy
+ephem
 geomag
+luma.core
+luma.oled
+pillow
