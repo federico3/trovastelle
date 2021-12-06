@@ -1,7 +1,11 @@
 import os
 import datetime
 import skyfield
-import ephem
+try:
+    import ephem
+    EPHEM_AVAILABLE=True
+except ModuleNotFoundError as e:
+    EPHEM_AVAILABLE=False
 from skyfield.api import N, Star, W, E, wgs84, Loader, load_file
 
 DATA_PATH = os.environ.get("CELESTIAL_COMPASS_DATA")
@@ -165,53 +169,44 @@ class ObservableSatellite(Observable):
     def __repr__(self):
         return("Observable: {}\n{}".format(self.name,self.satellite))
     
-class ObservableEphemSatellite(Observable):
-    def __init__(
-        self,
-        name: str,
-        data: ephem.FixedBody,
-        weight:float=1.,
-        color:list[float]=[1., 1., 1.],
-        check_visible:bool=True,
-    ):
-        self.name = name
-        self.satellite = data
-        self.weight = weight
-        self.color = color
-        self.check_visible = check_visible
-    def observe_topocentric(
-        self,
-        observer_lon_E_deg: float,
-        observer_lat_N_deg: float,
-        observer_h_m: float, 
-        observing_time: datetime,
-    ):
-#         ts = load.timescale()
-#         t = ts.from_datetime(observing_time)
-        
-#         observer_relative = wgs84.latlon(
-#             latitude_degrees=observer_lat_N_deg*N,
-#             longitude_degrees=observer_lon_E_deg*E,
-#             elevation_m=observer_h_m
-#         )
-        
-#         sat_relative = self.satellite - observer_relative
-#         sat_topocentric = sat_relative.at(t)
-#         alt, az, distance = sat_topocentric.altaz()
-        
-        ephemobs = ephem.Observer()
-        ephemobs.lon = str(observer_lon_E_deg)
-        ephemobs.lat = str(observer_lat_N_deg)
-        ephemobs.elevation = observer_h_m
+if EPHEM_AVAILABLE:
+    class ObservableEphemSatellite(Observable):
+        def __init__(
+            self,
+            name: str,
+            data: ephem.FixedBody,
+            weight:float=1.,
+            color:list[float]=[1., 1., 1.],
+            check_visible:bool=True,
+        ):
+            self.name = name
+            self.satellite = data
+            self.weight = weight
+            self.color = color
+            self.check_visible = check_visible
+        def observe_topocentric(
+            self,
+            observer_lon_E_deg: float,
+            observer_lat_N_deg: float,
+            observer_h_m: float, 
+            observing_time: datetime,
+        ):
+            
+            ephemobs = ephem.Observer()
+            ephemobs.lon = str(observer_lon_E_deg)
+            ephemobs.lat = str(observer_lat_N_deg)
+            ephemobs.elevation = observer_h_m
 
-        ephemobs.date = datetime.datetime.now()
+            ephemobs.date = datetime.datetime.now()
+            
+            self.satellite.compute(ephemobs)
+            
+            return self.satellite.alt, self.satellite.az, self.satellite.earth_distance
         
-        self.satellite.compute(ephemobs)
-#         print(float(voyager1_pyephem.alt), float(voyager1_pyephem.az))
-        
-        return self.satellite.alt, self.satellite.az, self.satellite.earth_distance
-    
-    def __str__(self):
-        return("Observable satellite: {}".format(self.name))
-    def __repr__(self):
-        return("Observable: {}\n{}".format(self.name,self.satellite))
+        def __str__(self):
+            return("Observable satellite: {}".format(self.name))
+        def __repr__(self):
+            return("Observable: {}\n{}".format(self.name,self.satellite))
+else:
+    class ObservableEphemSatellite(Observable):
+        pass
