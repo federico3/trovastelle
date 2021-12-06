@@ -117,8 +117,8 @@ insight = planets['mars barycenter']
 odyssey = planets['mars barycenter']
 
 missions_nopyspice = {
-    "Voyager 1": voyager_1,
-    "Voyager 2": voyager_2,
+#    "Voyager 1": voyager_1,
+#    "Voyager 2": voyager_2,
     "Juno": juno,
     "Curiosity": curiosity,
     "Perseverance": perseverance,

@@ -177,7 +177,7 @@ if EPHEM_AVAILABLE:
             name: str,
             data: ephem.FixedBody,
             weight:float=1.,
-            color:list[float]=[1., 1., 1.],
+            color:list=[1., 1., 1.],
             check_visible:bool=True,
         ):
             self.name = name
