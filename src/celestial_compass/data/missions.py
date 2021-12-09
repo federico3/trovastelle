@@ -26,14 +26,7 @@ import spiceypy as spice
 import glob
 
 from celestial_compass.observables import ObservableSkyObject
-
-DATA_PATH = os.environ.get("CELESTIAL_COMPASS_DATA")
-load = Loader(DATA_PATH)
-
-planets = load('de440.bsp')
-earth = planets['earth']
-
-ts = load.timescale()
+from celestial_compass.data.missions_base import ObservableMissions as base_missions
 
 class RawSPICEObject(VectorFunction):
     def __init__(self, kernel_list, target):
@@ -50,6 +43,9 @@ class RawSPICEObject(VectorFunction):
         v = state[0][3:]
         return r / AU_KM, v / AU_KM, None, None
 
+DATA_PATH = os.environ.get("CELESTIAL_COMPASS_DATA")
+load = Loader(DATA_PATH)
+    
 # Voyager
 vgr_kernels = glob.glob(os.path.join(DATA_PATH,'VGR','*.bsp'))
 vgr_kernels.append(os.path.join(DATA_PATH,'de440.bsp'))
@@ -58,19 +54,6 @@ vgr_kernels.append(os.path.join(DATA_PATH,'naif','generic_kernels','pck','pck000
 
 vgr1 = RawSPICEObject(vgr_kernels,"-31")
 vgr2 = RawSPICEObject(vgr_kernels,"-32")
-
-# Juno
-# so, the SPKs for Juno are only in the past. https://naif.jpl.nasa.gov/pub/naif/pds/data/jno-j_e_ss-spice-6-v1.0/jnosp_1000/data/spk/spkinfo.txt
-# But Juno is close enough to Jupiter for the purposes of this project
-juno = planets['jupiter barycenter']
-
-# Mars probes
-# Likewise for our Mars probes
-curiosity = planets['mars barycenter']
-perseverance = planets['mars barycenter']
-ingenuity = planets['mars barycenter']
-insight = planets['mars barycenter']
-odyssey = planets['mars barycenter']
 
 # Parker Solar Probe
 PSPkernels = [
@@ -90,14 +73,8 @@ bepi = RawSPICEObject(bepicolombo_kernels,"-121")
 missions = {
     "Voyager 1": vgr1,
     "Voyager 2": vgr2,
-    "Juno": juno,
-    "Curiosity": curiosity,
-    "Perseverance": perseverance,
-    "Ingenuity": ingenuity,
-    "InSight": insight,
-    "Mars Odyssey": odyssey,
     "Bepi Colombo": bepi,
     "Parker Solar Probe": PSP
 }
 
-ObservableMissions = [ObservableSkyObject(name=key, data=val) for key, val in missions.items()]
+ObservableMissions = [ObservableSkyObject(name=key, data=val, type_name="Mission") for key, val in missions.items()] + base_missions

@@ -17,6 +17,7 @@ class Observable(object):
         self.name = name
         self.data = data
         self.weight = weight
+        self.type_name = None
         self.color = color
         self.check_visible = check_visible
     def observe_topocentric(
@@ -40,11 +41,13 @@ class ObservableTerrestrialLocation(Observable):
         data: dict,
         weight:float=1.,
         color:list=[1., 1., 1.],
-        check_visible:bool=False
+        check_visible:bool=False,
+        type_name:str = "Mellon"
     ):
         self.name = name
         self.data = data
         self.weight = weight
+        self.type_name = type_name
         self.color = color
         self.check_visible = check_visible
         self.location_relative = wgs84.latlon(
@@ -89,10 +92,12 @@ class ObservableSkyObject(Observable):
         weight:float=1.,
         color:list=[1., 1., 1.],
         check_visible:bool=True,
+        type_name:str="Sky Object",
     ):
         self.name = name
         self.body = data
         self.weight = weight
+        self.type_name = type_name
         self.color = color
         self.check_visible = check_visible
         if earth is None:
@@ -136,10 +141,12 @@ class ObservableSatellite(Observable):
         weight:float=1.,
         color:list=[1., 1., 1.],
         check_visible:bool=True,
+        type_name:str="Satellite",
     ):
         self.name = name
         self.satellite = data
         self.weight = weight
+        self.type_name = type_name
         self.color = color
         self.check_visible = check_visible
     def observe_topocentric(
@@ -179,10 +186,12 @@ if EPHEM_AVAILABLE:
             weight:float=1.,
             color:list=[1., 1., 1.],
             check_visible:bool=True,
+            type_name:str="Satellite",
         ):
             self.name = name
             self.satellite = data
             self.weight = weight
+            self.type_name = type_name
             self.color = color
             self.check_visible = check_visible
         def observe_topocentric(

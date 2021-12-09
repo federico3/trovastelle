@@ -70,4 +70,4 @@ with load.open(d3cel_messier_URL, filename=os.path.join(DATA_PATH,"d3cel_Messier
 
 mlist_named = mlist[mlist['named']]
 
-ObservableMessiers = [ObservableSkyObject(name=messier[1]['dso_name'],data=Star.from_dataframe(messier[1])) for messier in mlist_named.iterrows()]
+ObservableMessiers = [ObservableSkyObject(name=messier[1]['dso_name'],data=Star.from_dataframe(messier[1]),type_name="Messier") for messier in mlist_named.iterrows()]

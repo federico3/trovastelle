@@ -38,4 +38,4 @@ satellites = [by_name_stations['ISS (ZARYA)'], by_name_stations['TIANHE'], by_na
 
 ObservableSatellites = []
 for satellite in satellites:
-    ObservableSatellites.append(ObservableSatellite(name=satellite.name, data=satellite))
+    ObservableSatellites.append(ObservableSatellite(name=satellite.name, data=satellite, type_name="Satellite"))

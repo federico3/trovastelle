@@ -46,20 +46,10 @@ VOYAGER 1-3,h,12/18.497/1979,35.8006,178.355,-21.7477,3.72559,8.77808,1950,0,0
 """ 
 
 import os
-from skyfield.api import Loader, wgs84
-from skyfield.vectorlib import VectorFunction
-from skyfield.constants import AU_KM
 import ephem
 
-from celestial_compass.observables import ObservableEphemSatellite, ObservableSkyObject
-
-DATA_PATH = os.environ.get("CELESTIAL_COMPASS_DATA")
-load = Loader(DATA_PATH)
-
-planets = load('de440.bsp')
-earth = planets['earth']
-
-ts = load.timescale()
+from celestial_compass.observables import ObservableEphemSatellite
+from celestial_compass.data.missions_base import ObservableMissions
 
 
 # Voyager
@@ -68,35 +58,13 @@ voyager2_pyephem_raw = ephem.readdb("VOYAGER 2-6,h,04/30.224/1983,78.8189,100.93
 
 voyager1_pyephem = ObservableEphemSatellite(
     name='Voyager 1',
-    data=voyager1_pyephem_raw
+    data=voyager1_pyephem_raw,
+    type_name="Mission",
 )
 voyager2_pyephem = ObservableEphemSatellite(
     name='Voyager 2',
-    data=voyager2_pyephem_raw
+    data=voyager2_pyephem_raw,
+    type_name="Mission",
 )
 
-# Juno
-# so, the SPKs for Juno are only in the past. https://naif.jpl.nasa.gov/pub/naif/pds/data/jno-j_e_ss-spice-6-v1.0/jnosp_1000/data/spk/spkinfo.txt
-# But Juno is close enough to Jupiter for the purposes of this project
-juno = planets['jupiter barycenter']
-
-# Mars probes
-# Likewise for our Mars probes
-curiosity = planets['mars barycenter']
-perseverance = planets['mars barycenter']
-ingenuity = planets['mars barycenter']
-insight = planets['mars barycenter']
-odyssey = planets['mars barycenter']
-
-
-
-missions = {
-    "Juno": juno,
-    "Curiosity": curiosity,
-    "Perseverance": perseverance,
-    "Ingenuity": ingenuity,
-    "InSight": insight,
-    "Mars Odyssey": odyssey,
-}
-
-ObservableMissions = [voyager1_pyephem, voyager2_pyephem] + [ObservableSkyObject(name=key, data=val) for key, val in missions.items()]
+ObservableMissions = [voyager1_pyephem, voyager2_pyephem] + ObservableMissions

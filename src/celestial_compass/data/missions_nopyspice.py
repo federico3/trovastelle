@@ -29,6 +29,7 @@ import numpy as np
 import networkx as nx
 
 from celestial_compass.observables import ObservableSkyObject
+from celestial_compass.data.missions_base import ObservableMissions as base_missions
 
 
 class Type01Object(VectorFunction):
@@ -84,12 +85,7 @@ class Type01Object(VectorFunction):
 
 DATA_PATH = os.environ.get("CELESTIAL_COMPASS_DATA")
 load = Loader(DATA_PATH)
-
-planets = load('de440.bsp')
-earth = planets['earth']
-
-ts = load.timescale()
-
+    
 v1_kernel_file = os.path.join(DATA_PATH,'Voyager_1.a54206u_V0.2_merged.bsp')
 # v1_kernel_file = 'data/voyager_1.ST+1991_a54418u.merged.bsp'
 v2_kernel_file = os.path.join(DATA_PATH,'Voyager_2.m05016u.merged.bsp')
@@ -105,26 +101,9 @@ voyager_2_kernel_type1 = SPKType01.open(v2_kernel_file)
 voyager_2_kernel_type2 = SPK.open(v2_kernel_file)
 voyager_2 = Type01Object(voyager_2_kernel_type1, -32, voyager_2_kernel_type2)
 
-# so, the SPKs for Juno are only in the past. https://naif.jpl.nasa.gov/pub/naif/pds/data/jno-j_e_ss-spice-6-v1.0/jnosp_1000/data/spk/spkinfo.txt
-# But Juno is close enough to Jupiter for the purposes of this project
-juno = planets['jupiter barycenter']
-
-# Likewise for our Mars probes
-curiosity = planets['mars barycenter']
-perseverance = planets['mars barycenter']
-ingenuity = planets['mars barycenter']
-insight = planets['mars barycenter']
-odyssey = planets['mars barycenter']
-
 missions_nopyspice = {
-#    "Voyager 1": voyager_1,
-#    "Voyager 2": voyager_2,
-    "Juno": juno,
-    "Curiosity": curiosity,
-    "Perseverance": perseverance,
-    "Ingenuity": ingenuity,
-    "InSight": insight,
-    "Mars Odyssey": odyssey,
+   "Voyager 1": voyager_1,
+   "Voyager 2": voyager_2,
 }
 
-ObservableMissions = [ObservableSkyObject(name=key, data=val) for key, val in missions_nopyspice.items()]
+ObservableMissions = [ObservableSkyObject(name=key, data=val, type_name="Mission") for key, val in missions_nopyspice.items()] + base_missions

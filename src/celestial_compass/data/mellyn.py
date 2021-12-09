@@ -27,4 +27,4 @@ DATA_PATH = os.environ.get("CELESTIAL_COMPASS_DATA")
 with open(os.path.join(DATA_PATH, 'mellyn.json'), 'r') as mellyn_file:
     mellyn = json.load(mellyn_file)
 
-ObservableMellyn = [ObservableTerrestrialLocation(name=mellon['name'], data=mellon) for mellon in mellyn]
+ObservableMellyn = [ObservableTerrestrialLocation(name=mellon['name'], data=mellon, type_name="Mellon") for mellon in mellyn]

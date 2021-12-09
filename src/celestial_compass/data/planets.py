@@ -25,7 +25,7 @@ from celestial_compass.observables import ObservableSkyObject
 DATA_PATH = os.environ.get("CELESTIAL_COMPASS_DATA")
 
 load = Loader(DATA_PATH)
-planets = load('de440.bsp')
+planets = load('de440s.bsp')
 
 planet_names = [
     "Mercury",
@@ -47,5 +47,5 @@ for planet_name in planet_names:
     except:
         new_planet = planets[planet_name+ " barycenter"]
     ObservablePlanets.append(
-        ObservableSkyObject(name=planet_name, data=new_planet, earth=planets['earth'])
+        ObservableSkyObject(name=planet_name, data=new_planet, earth=planets['earth'], type_name="Planet")
     )
