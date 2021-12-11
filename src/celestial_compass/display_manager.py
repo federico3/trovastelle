@@ -1,21 +1,20 @@
 """
- Copyright 2021 by California Institute of Technology.  ALL RIGHTS RESERVED.
- United  States  Government  sponsorship  acknowledged.   Any commercial use
- must   be  negotiated  with  the  Office  of  Technology  Transfer  at  the
- California Institute of Technology.
+ Copyright (C) 2021 Federico Rossi (347N)
  
- This software may be subject to  U.S. export control laws  and regulations.
- By accepting this document,  the user agrees to comply  with all applicable
- U.S. export laws and regulations.  User  has the responsibility  to  obtain
- export  licenses,  or  other  export  authority  as may be required  before
- exporting  such  information  to  foreign  countries or providing access to
- foreign persons.
+ This file is part of Trovastelle.
  
- This  software  is a copy  and  may not be current.  The latest  version is
- maintained by and may be obtained from the Mobility  and  Robotics  Sytstem
- Section (347) at the Jet  Propulsion  Laboratory.   Suggestions and patches
- are welcome and should be sent to the software's maintainer.
+ Trovastelle is free software: you can redistribute it and/or modify
+ it under the terms of the GNU General Public License as published by
+ the Free Software Foundation, either version 3 of the License, or
+ (at your option) any later version.
  
+ Trovastelle is distributed in the hope that it will be useful,
+ but WITHOUT ANY WARRANTY; without even the implied warranty of
+ MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ GNU General Public License for more details.
+ 
+ You should have received a copy of the GNU General Public License
+ along with Trovastelle.  If not, see <http://www.gnu.org/licenses/>.
 """
 
 from luma.core.interface.serial import i2c, spi, pcf8574
@@ -56,7 +55,11 @@ def format_distance(distance: skyfield.units.Distance, width=5):
 #     1 au ~ 150M  (10~8 km)
 
     distance_ly = distance.m/9460730472580800 # https://en.wikipedia.org/wiki/Light-year
-    if distance_ly>0.1:
+    if distance_ly>1e9:
+        distance_str = round_number_to_fixed_width(distance_ly/1e9, width-1)+ "B LY"
+    elif distance_ly>1e6:
+        distance_str = round_number_to_fixed_width(distance_ly/1e6, width-1)+ "M LY"
+    elif distance_ly>0.1:
         distance_str = round_number_to_fixed_width(distance_ly, width)+ " LY"
     elif distance.au > 0.1:
         distance_str = round_number_to_fixed_width(distance.au, width)+ " AU"
@@ -84,16 +87,19 @@ def test_distance_format():
     return
 
 class DisplayController(object):
-    def __init__(self):
-        serial = i2c(port=1, address=0x3C)
+    def __init__(self, device=None):
+        if device is None:
+            serial = i2c(port=1, address=0x3C)
 
-        # substitute ssd1331(...) or sh1106(...) below if using that device
-        self.device = ssd1309(serial)
+            # substitute ssd1331(...) or sh1106(...) below if using that device
+            self.device = ssd1309(serial)
+        else:
+            self.device = device
         
         self.object_name_width  = self.device.width
         self.object_name_height = round(self.device.height*2/3)
         self.object_name_origin = (0,0)
-        self.object_name_margin = 1
+        self.object_name_margin = 4
         
         self.object_type_width  = round(self.device.width)/2
         self.object_type_height = self.device.height-self.object_name_height
@@ -118,7 +124,7 @@ class DisplayController(object):
             top = (self.device.height - h) / 2 
             draw.text((left, top), text=text, font=font, fill="white")
     
-    def _display_text_in_box(
+    def _get_text_size_for_box(
         self,
         draw: canvas,
         text: str,
@@ -136,6 +142,38 @@ class DisplayController(object):
             font_size += 1
             font = self.make_font(font_name, font_size)
             text_width, text_height = draw.textsize(text=text, font=font)
+        return font_size-1
+    
+    def _display_text_in_box(
+        self,
+        draw: canvas,
+        text: str,
+        width: int,
+        height: int,
+        margin: int=0,
+        origin: tuple=(0,0),
+        font_size:int=None,
+        font_name: str="LiberationSans-Regular.ttf"
+    ):
+        if font_size is None:
+            font_size=self._get_text_size_for_box(
+                draw=draw,
+                text=text,
+                width=width,
+                height=height,
+                margin=margin,
+                origin=origin,
+                font_name=font_name,
+            )
+    
+#             font_size = 0
+#         text_width = 0
+#         text_height = 0
+# #         with canvas(self.device) as draw:
+#         while (text_width<(width-margin)) and (text_height<(height-margin)):
+#             font_size += 1
+        font = self.make_font(font_name, font_size)
+        text_width, text_height = draw.textsize(text=text, font=font)
         draw.text(
             (origin[0]+round((width-text_width)/2), origin[1]+round((height-text_height)/2)),
              text=text,
@@ -160,6 +198,24 @@ class DisplayController(object):
                 margin=self.object_name_margin,
                 font_name=font_name
             )
+            type_size = self._get_text_size_for_box(
+                draw=draw,
+                text=observable_type,
+                width=self.object_type_width,
+                height=self.object_type_height,
+                origin=self.object_type_origin,
+                margin=self.object_type_margin,
+                font_name=font_name
+            )
+            dist_size = self._get_text_size_for_box(
+                draw=draw,
+                text=observable_dist,
+                width=self.object_dist_width,
+                height=self.object_dist_height,
+                origin=self.object_dist_origin,
+                margin=self.object_dist_margin,
+                font_name=font_name
+            )
             self._display_text_in_box(
                 draw=draw,
                 text=observable_type,
@@ -167,6 +223,7 @@ class DisplayController(object):
                 height=self.object_type_height,
                 origin=self.object_type_origin,
                 margin=self.object_type_margin,
+                font_size=min(type_size, dist_size),
                 font_name=font_name
             )
             self._display_text_in_box(
@@ -176,6 +233,7 @@ class DisplayController(object):
                 height=self.object_dist_height,
                 origin=self.object_dist_origin,
                 margin=self.object_dist_margin,
+                font_size=min(type_size, dist_size),
                 font_name=font_name
             )
         

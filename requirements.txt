@@ -4,6 +4,7 @@ numpy
 matplotlib
 adafruit_circuitpython_bno055
 adafruit-circuitpython-motorkit
+adafruit-circuitpython-motor
 scipy
 skyfield
 pytz
@@ -15,4 +16,6 @@ ephem
 geomag
 luma.core
 luma.oled
+luma.emulator
 pillow
+tzwhere
