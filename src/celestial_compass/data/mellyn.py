@@ -1,22 +1,22 @@
 """
- Copyright 2021 by California Institute of Technology.  ALL RIGHTS RESERVED.
- United  States  Government  sponsorship  acknowledged.   Any commercial use
- must   be  negotiated  with  the  Office  of  Technology  Transfer  at  the
- California Institute of Technology.
+ Copyright (C) 2021 Federico Rossi (347N)
  
- This software may be subject to  U.S. export control laws  and regulations.
- By accepting this document,  the user agrees to comply  with all applicable
- U.S. export laws and regulations.  User  has the responsibility  to  obtain
- export  licenses,  or  other  export  authority  as may be required  before
- exporting  such  information  to  foreign  countries or providing access to
- foreign persons.
+ This file is part of Trovastelle.
  
- This  software  is a copy  and  may not be current.  The latest  version is
- maintained by and may be obtained from the Mobility  and  Robotics  Sytstem
- Section (347) at the Jet  Propulsion  Laboratory.   Suggestions and patches
- are welcome and should be sent to the software's maintainer.
+ Trovastelle is free software: you can redistribute it and/or modify
+ it under the terms of the GNU General Public License as published by
+ the Free Software Foundation, either version 3 of the License, or
+ (at your option) any later version.
  
+ Trovastelle is distributed in the hope that it will be useful,
+ but WITHOUT ANY WARRANTY; without even the implied warranty of
+ MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ GNU General Public License for more details.
+ 
+ You should have received a copy of the GNU General Public License
+ along with Trovastelle.  If not, see <http://www.gnu.org/licenses/>.
 """
+
 import os
 import json
 
