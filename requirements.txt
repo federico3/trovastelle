@@ -19,3 +19,4 @@ luma.oled
 luma.emulator
 pillow
 tzwhere
+# Needs sudo apt-get install libgeos-dev

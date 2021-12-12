@@ -12,6 +12,12 @@ DATA_PATH = os.environ.get("CELESTIAL_COMPASS_DATA")
 
 load = Loader(DATA_PATH)
 
+class ObserverLLA(object):
+    def __init__(self, lat_rad: float, lon_rad: float, alt_m: float=0):
+        self.lat_rad = lat_rad
+        self.lon_rad = lon_rad
+        self.alt_m = alt_m
+
 class Observable(object):
     def __init__(self, name, data, weight:float=1., color:list=[1., 1., 1.], check_visible:bool=True):
         self.name = name
@@ -32,7 +38,7 @@ class Observable(object):
     def __str__(self):
         return("Observable: {}".format(self.name))
     def __repr__(self):
-        return("Observable: {}\n{}".format(self.name,self.data))
+        return("Observable: {} ({}) \n{}".format(self.name,self.type_name,self.data))
     
 class ObservableTerrestrialLocation(Observable):
     def __init__(
