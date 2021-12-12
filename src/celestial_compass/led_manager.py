@@ -20,6 +20,7 @@
 import RPi.GPIO as GPIO
 import time, datetime
 import numpy as np
+import threading
 
 class RGBManager(object):
     def __init__(self, R_LED: int=5, G_LED: int=19, B_LED: int=6, A_LED: int=13, anode_high: bool=False, voltage_scale: float=1.):
@@ -30,6 +31,7 @@ class RGBManager(object):
         self.A_LED = A_LED
         self.anode_high = anode_high
         self.voltage_scale = voltage_scale
+        self._keep_breathing = True
         
         self.RGB_pins = {"R": R_LED, "G": G_LED, "B": B_LED, "A": A_LED}
         self.RGB_PWM = {}
@@ -41,6 +43,7 @@ class RGBManager(object):
     def __del__(self):
         for color, pin in self.RGB_pins.items():
             self.RGB_PWM[color].stop()
+        GPIO.cleanup()
             
     def display_color(self, RGB_color: list=[1.,1.,1.]):
         if self.anode_high:
@@ -54,12 +57,24 @@ class RGBManager(object):
             self.RGB_PWM['B'].ChangeDutyCycle(self.voltage_scale*(RGB_color[2]*100))
             self.RGB_PWM['A'].ChangeDutyCycle(0)
     def breathe_color(self, RGB_color: list=[1.,1.,1.], frequency_hz: float=.25, duration_s: float=10):
+        self._keep_breathing = True
         start_time = datetime.datetime.now()
         current_time = datetime.datetime.now()
         time_elapsed = (current_time-start_time).total_seconds()
-        while time_elapsed<duration_s:
+        while time_elapsed<duration_s and self._keep_breathing:
             current_time = datetime.datetime.now()
             time_elapsed = (current_time-start_time).total_seconds()
             amplitude = (np.cos(time_elapsed*frequency_hz*2*np.pi)+1)/2
             self.display_color(np.array(RGB_color)*amplitude)
             time.sleep(0.05)
+            
+    def breathe_color_async(self, RGB_color: list=[1.,1.,1.], frequency_hz: float=.25, duration_s: float=10):
+        # Stop other threads who may be breathing
+        if self._keep_breathing is True:
+            self._keep_breathing=False 
+            time.sleep(0.1)
+            self._keep_breathing=True
+        
+        _thread = threading.Thread(target=self.breathe_color, args=(RGB_color,frequency_hz, duration_s))
+        _thread.start()
+        self._keep_breathing=False
