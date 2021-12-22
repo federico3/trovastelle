@@ -15,11 +15,16 @@ Per iniziare, collega un alimentatore da 12V[^1] con jack da 2.1mm (pin centrale
 Il Trovastelle funziona senza alcuna connessione a Internet; tuttavia, con una connessione a Internet, può trovare anche satelliti nel cielo (per esempio, Hubble e la ISS).
 
 Per collegare il Trovastelle a Internet, cerca una connessione WiFi aperta dal nome `comitup-XXX`.
-![Look for an open WiFi network named comitup-XXX](docs/img/Comitup_1.jpg)
+
+<img src="docs/img/Comitup_1.jpg" alt="Look for an open WiFi network named comitup-XXX" width="400">
+
 Collegati alla rete WiFi `comitup`. Il tuo computer o telefono aprirà una finestra pop-up che ti chiede di scegliere la tua rete WiFi.
-![Select your WiFi network](docs/img/Comitup_2.jpg)
+
+<img src="docs/img/Comitup_2.jpg" alt="Select your WiFi network" width="400">
+
 Scegli la tua rete WiFi e inserisci la password. Il Trovastelle farà sparire la rete `comitup` e si collegherà al tuo WiFi.
-![Input your WiFi password](docs/img/Comitup_3.jpg)
+
+<img src="docs/img/Comitup_3.jpg" alt="Input your WiFi password" width="400">
 
 ### Accedi al Trovastelle
 
