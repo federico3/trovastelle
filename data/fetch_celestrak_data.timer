@@ -1,0 +1,11 @@
+[Unit]
+Description=Fetch Celestrak data daily
+Requires=fetch_celestrak_data.service
+
+[Timer]
+Unit=fetch_celestrak_data.service
+OnCalendar=daily
+Persistent=true
+
+[Install]
+WantedBy=timers.target

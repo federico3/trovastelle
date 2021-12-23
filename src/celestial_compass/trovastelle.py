@@ -30,10 +30,10 @@ from celestial_compass.observables import ObserverLLA
 import numpy as np
 
 if __name__ == "__main__":
-    
+
     # Logging config
-    logging.basicConfig(filename='myapp.log', level=logging.DEBUG)
-    
+    logging.basicConfig(filename='myapp.log', level=logging.INFO)
+
     # LED config
     logging.debug("Configuring LEDs")
     R_LED = 5
@@ -55,7 +55,11 @@ if __name__ == "__main__":
         'Planet': "xkcd:pale mauve",
         'Satellite': "xkcd:magenta",
     }
-    
+
+    logging.debug("Configuring display")
+    display_controller = DisplayController()
+    display_controller.display_fullscreen_text("Trovastelle")
+
 
     logging.debug("Configuring observables")
     # Observables config
@@ -72,14 +76,14 @@ if __name__ == "__main__":
     else:
         from celestial_compass.data.missions_base import ObservableMissions
     from celestial_compass.data.planets import ObservablePlanets
-    # from celestial_compass.data.small_bodies import ObservableSmallBodies
+    from celestial_compass.data.small_bodies import ObservableSmallBodies
     from celestial_compass.data.mellyn import ObservableMellyn    
     from celestial_compass.data.messier import ObservableMessiers
-    
+
 
     # Observables = ObservableSatellites+ObservableMissions+ObservablePlanets+ObservableSmallBodies+ObservableMellyn+ObservableMessiers
     Observables = ObservableSatellites+ObservableMissions+ObservablePlanets+ObservableMellyn+ObservableMessiers
-    
+
     logging.debug("Configuring observer")
     # Observer: Marzia
     _observer = ObservableMellyn[4]
@@ -97,22 +101,29 @@ if __name__ == "__main__":
         simulate_9dof=False,
         steps_per_turn_alt=2052,
         steps_per_turn_az=int(200*16/6),
+        az_offset_rad=-np.pi/4,
     )
-    
+
     logging.debug("Configuring Trovastelle")
     # Full controller
     cc = CelestialCompass(
             controller= ac,
             observer = observer,
             observables = Observables,
-            time_on_target_s=15.,
-            target_list_length_s=60,
+            time_on_target_s=150.,
+            target_list_length_s=600,
             check_visible= False,
     #         visibility_window=VisibilityWindow(min_alt_rad=0.),
+            display_controller=display_controller,
             simulated_display=False,
             led_pins_rgba = (R_LED, G_LED, B_LED, A_LED),
             led_colors=strong_colors_by_type,
         )
+
+    logging.info("Calibrating! Trovastelle")
     
-    logging.debug("Running! Trovastelle")
+    cc.calibrate()
+    
+    logging.info("Running! Trovastelle")
+
     cc.run()

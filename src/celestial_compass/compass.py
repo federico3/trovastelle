@@ -97,7 +97,7 @@ class CelestialCompass(object):
     def calibrate(self):
         for _try in range(3):
             self.display_controller.display_calibration_data(self.controller.calibration_status)
-            self.controller.calibrate(max_tries=1)
+            self.controller.calibrate(max_tries=1, report_status_function=self.display_controller.display_calibration_data)
         self.display_controller.display_calibration_data(self.controller.calibration_status)
         
     def update_schedule(self):
@@ -128,7 +128,7 @@ class CelestialCompass(object):
                 _visible_start = self.visibility_window.is_visible(_observable, self.observer, _schedule_end_time)
                 _visible_end = self.visibility_window.is_visible(_observable, self.observer, _schedule_end_time+datetime.timedelta(seconds=self.time_on_target_s))
                 if not _visible_start or not _visible_end:
-                    print(_observable, "is not visible")
+                    logging.info(_observable, "is not visible")
                     continue
 
             self.schedule.append(

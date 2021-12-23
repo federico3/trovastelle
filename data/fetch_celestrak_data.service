@@ -1,0 +1,12 @@
+[Unit]
+Description=Fetch Celestrak data
+Wants=fetch_celestrak_data.timer
+Wants=network-online.target
+After=network-online.target
+
+[Service]
+Type=oneshot
+ExecStart=/home/pi/sky-finder/data/fetch_celestrak_data.sh
+
+[Install]
+WantedBy=multi-user.target
