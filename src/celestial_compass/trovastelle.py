@@ -92,7 +92,12 @@ if __name__ == "__main__":
 
     logging.debug("Configuring arrow controller")
     # Arrow controller
-    ac = ArrowController(simulate_motors=False, simulate_9dof=False)
+    ac = ArrowController(
+        simulate_motors=False,
+        simulate_9dof=False,
+        steps_per_turn_alt=2052,
+        steps_per_turn_az=int(200*16/6),
+    )
     
     logging.debug("Configuring Trovastelle")
     # Full controller

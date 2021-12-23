@@ -180,7 +180,23 @@ class DisplayController(object):
              font=font,
              fill="white"
             )
-        
+    
+    def display_fullscreen_text(
+        self,
+        text: str="",
+        font_name: str="LiberationSans-Regular.ttf",    
+    ):
+        with canvas(self.device) as draw:
+            self._display_text_in_box(
+                draw=draw,
+                text=text,
+                width=self.device.width,
+                height=self.device.height,
+                origin=(0,0),
+                margin=4,
+                font_name=font_name
+            )
+    
     def display_observable_data(
         self,
         observable_name: str="",
@@ -236,7 +252,84 @@ class DisplayController(object):
                 font_size=min(type_size, dist_size),
                 font_name=font_name
             )
-        
+
+    def display_calibration_data(
+        self,
+        calibration_data: tuple=(0,0,0,0),
+        font_name: str="LiberationSans-Regular.ttf"
+    ):
+        with canvas(self.device) as draw:
+            calibration_title_width  = self.device.width
+            calibration_title_height = round(self.device.height/3)
+            calibration_title_origin = (0,0)
+            calibration_title_margin = 4
+            
+            self._display_text_in_box(
+                draw=draw,
+                text="Calibrazione",
+                width=calibration_title_width,
+                height=calibration_title_height,
+                origin=calibration_title_origin,
+                margin=calibration_title_margin,
+                font_name=font_name
+            )
+#             self.object_dist_width  = self.device.width-round(self.device.width)/2
+#             self.object_dist_height = self.device.height-self.object_name_height
+#             self.object_dist_origin = (self.object_type_width+1,round(self.device.height*2/3)+1)
+#             self.object_dist_margin = 4
+            #sys, gyro, accel, and mag
+            data_width  = round(self.device.width/2)
+            data_height = round((self.device.height-calibration_title_height)/2)
+            data_size = self._get_text_size_for_box(
+                draw=draw,
+                text="Sys: {}/3".format(calibration_data[0]),
+                width= data_width,
+                height=data_height,
+                origin=(0,calibration_title_height),
+                margin=4,
+                font_name=font_name
+            )
+            self._display_text_in_box(
+                draw=draw,
+                text="Sys: {}/3".format(calibration_data[0]),
+                width= data_width,
+                height=data_height,
+                origin=(0,calibration_title_height),
+                margin=4,
+                font_size=data_size,
+                font_name=font_name
+            )
+            self._display_text_in_box(
+                draw=draw,
+                text="Gyr: {}/3".format(calibration_data[1]),
+                width= data_width,
+                height=data_height,
+                origin=(0,calibration_title_height+data_height),
+                margin=4,
+                font_size=data_size,
+                font_name=font_name
+            )
+            self._display_text_in_box(
+                draw=draw,
+                text="Acc: {}/3".format(calibration_data[2]),
+                width= data_width,
+                height=data_height,
+                origin=(data_width,calibration_title_height),
+                margin=4,
+                font_size=data_size,
+                font_name=font_name
+            )
+            self._display_text_in_box(
+                draw=draw,
+                text="Mag: {}/3".format(calibration_data[3]),
+                width= data_width,
+                height=data_height,
+                origin=(data_width,calibration_title_height+data_height),
+                margin=4,
+                font_size=data_size,
+                font_name=font_name
+            )
+
     
     def make_font(self, name, size):
         DATA_PATH = os.environ.get("CELESTIAL_COMPASS_DATA")

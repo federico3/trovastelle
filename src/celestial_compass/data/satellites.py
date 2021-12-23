@@ -37,7 +37,14 @@ visual_sats = load.tle_file(visual_sats_url, filename="Celestrak_visual.txt")
 by_name_stations = {sat.name: sat for sat in stations}
 by_name_visual = {sat.name: sat for sat in visual_sats}
 
-satellites = [by_name_stations['ISS (ZARYA)'], by_name_stations['TIANHE'], by_name_visual['HST']]
+satellites = []
+
+if 'ISS (ZARYA)' in by_name_stations.keys():
+    satellites.append(by_name_stations['ISS (ZARYA)'])
+if 'TIANHE' in by_name_stations.keys():
+    satellites.append(by_name_stations['TIANHE'])
+if 'HST' in by_name_visual.keys():
+    satellites.append(by_name_visual['HST'])
 
 ObservableSatellites = []
 now = ts.from_datetime(datetime.datetime.now(datetime.timezone.utc))

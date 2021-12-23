@@ -41,6 +41,7 @@ class CelestialCompass(object):
         check_visible: bool = False,
         visibility_window: VisibilityWindow=VisibilityWindow(),
         refresh_rate_hz:float = 1.,
+        display_controller: DisplayController=None,
         simulated_display: bool=False,
         simulated_led:bool=False,
         simulated_motors:bool=False,
@@ -79,16 +80,25 @@ class CelestialCompass(object):
         logging.debug("Creating schedule")
         self.update_schedule()
         
-        logging.debug("Setting up display controller")
-        if simulated_display:
-            device = luma.emulator.device.capture()
-            self.display_controller = DisplayController(device=device)
+        if display_controller is None:
+            logging.debug("Setting up display controller")
+            if simulated_display:
+                device = luma.emulator.device.capture()
+                self.display_controller = DisplayController(device=device)
+            else:
+                self.display_controller = DisplayController()
         else:
-            self.display_controller = DisplayController()
+            self.display_controller = display_controller
         
         self.refresh_rate_hz = refresh_rate_hz
         logging.debug("Ready to run")
         self.running = True
+        
+    def calibrate(self):
+        for _try in range(3):
+            self.display_controller.display_calibration_data(self.controller.calibration_status)
+            self.controller.calibrate(max_tries=1)
+        self.display_controller.display_calibration_data(self.controller.calibration_status)
         
     def update_schedule(self):
         logging.debug("Updating schedule")
