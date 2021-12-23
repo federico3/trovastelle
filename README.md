@@ -1,82 +1,58 @@
-# Sky Finder
+# Il Trovastelle
 
-An arrow that points at interesting objects in the sky, inspired by the art installation at the JPL mall.
+Il Trovastelle punta a oggetti interessanti nel cielo e sulla Terra. Sa dove trovare pianeti, lune, e asteroidi, missioni spaziali e satelliti, galassie e nebulose, e amici vicini e lontani.
 
-## Basic idea
+## Come funziona
 
-A pointing mechanism (an arrow and/or a laser pointer) that will point out interesting targets in the sky either automatically or in response to user input.
+Il Trovastelle usa un accelerometro, una bussola, un giroscopio, e un orologio molto preciso per sapere dove trovare oggetti nel cielo.
 
-Targets may include
+## Configurazione
 
-- Stars, galaxies, and other interesting deep sky objects
-- Earth satellites
-- Locations on Earth (mountains, cities, friends)
-- Airplanes?
+Per iniziare, collega un alimentatore da 12V[^1] con jack da 2.1mm (pin centrale positivo) al Trovastelle, e premi il pulsante di accensione.
 
-The mechanism should have a screen to display what is being observed.
+### Connetti il Trovastelle a Internet
 
-## Hardware
+Il Trovastelle funziona senza alcuna connessione a Internet; tuttavia, con una connessione a Internet, può trovare anche satelliti nel cielo (per esempio, Hubble e la ISS).
 
-### Frame and Assembly
+Per collegare il Trovastelle a Internet, cerca una connessione WiFi aperta dal nome `comitup-XXX`.
 
-### Motors
+<img src="docs/img/Comitup_1.jpg" alt="Look for an open WiFi network named comitup-XXX" width="400">
 
-Steppers, servos, simple DC motors?
+Collegati alla rete WiFi `comitup`. Il tuo computer o telefono aprirà una finestra pop-up che ti chiede di scegliere la tua rete WiFi.
 
-Need a motor driver
+<img src="docs/img/Comitup_2.jpg" alt="Select your WiFi network" width="400">
 
-### Display
+Scegli la tua rete WiFi e inserisci la password. Il Trovastelle farà sparire la rete `comitup` e si collegherà al tuo WiFi.
 
-### Laser Pointer
+<img src="docs/img/Comitup_3.jpg" alt="Input your WiFi password" width="400">
 
-### Brains
+### Accedi al Trovastelle
 
-System-on-a-chip (SoC) like a Raspberry Pi or microcontroller like ESP/Arduino?
+Il cuore del Trovastelle è un computer Raspberry Pi con Linux. Una volta connesso il Trovastelle alla rete WiFi di casa, puoi collegarti al computer via ssh se hai le chiavi giuste:
 
-- SoC is way easier to work with (existing astronomy libraries, etc) and has no storage/RAM limitations, but boots slowly and has higher power consumption.
-- Microcontroller boots instantly and has lower power usage, but is _very_ limited (a few kBs of RAM).
+```
+ssh pi@trovastelle1.local
+```
 
+Questo comando funzionerà solamente se (i) sei sulla stessa rete WiFi del Trovastelle, e (ii) hai una chiave privata SSH corrispondente alla chiave pubblica caricata sul Trovastelle.
 
-### Power
+### Telemetria
 
-USB plug and built-in battery? Need a charge controller to automatically switch from shore power to on-board battery.
+Il Trovastelle può collegarsi al server di Federico per ricevere aggiornamenti (forse) e aiutare il debug di eventuali problemi. Questa impostazione è disattivata di default. Per attivarla, collegati al Trovastelle via SSH e usa questo comando:
+```
+sudo systemctl enable autossh
+sudo systemctl start autossh
+```
+Per disattivare questa impostazione, usa questo comando:
+```
+sudo systemctl stop autossh
+sudo systemctl disable autossh
+```
+Quando la telemetria è attiva, Federico può collegarsi via ssh al Trovastelle, cambiare il programma caricato a bordo, vedere le misure prese dall'accelerometro, giroscopio, e bussola, e comandare i motori, il display, e il LED.
 
-## Design concepts
+### Progetto meccanico
 
-### V1: Sky only, semi-automatic
+Il progetto Fusion 360 è [qui](https://a360.co/3moek6k).
 
-A pair of stepper motors actuate the pointing mechanism. A microcontroller keeps track of the location of the stepper motors and reports it to SkySafari through the [basic encoder protocol](https://github.com/federico3/DobsonianDSC). [SkySafari](https://play.google.com/store/apps/details?id=com.simulationcurriculum.skysafari5&hl=en_US) issues GOTO commands to the microcontroller via the same protocol. All projections and translations from steps to sky coordinates are performed by Sky Safari.
-
-> TODO: does SkySafari send GoTo commands with the basic protocol?
-
-No screen, no laser pointer, no way to automatically point at objects, calibration needed before every use.
-
-Downside: needs external calibration before use.
-
-### V2: self-calibrating
-
-A compass and accelerometer are installed on the pointing mechanism. This way, the arrow knows where it is pointed (to a precision of a few degrees) in the local alt-az frame. The arrow can communicate its azm-alt to Sky Safari using the [NexStar serial protocol](https://s3.amazonaws.com/celestron-site-support-files/support_files/1154108406_nexstarcommprot.pdf). Conversions from ra-dec to alt-az can be handled with, e.g., [astropy](https://gist.github.com/dokeeffe/18857db66dbabc14679c20a8560e2cd6). 
-
-#### Software updates
-
-- SkySafari compatibility with new protocol
-- Cycle through scripted celestial objects autonomously
-- Slew to follow satellites autonomously
-- Cycle through ground-based objects (lon-lat) autonomously
-- Read airplane locations from fr24 or adsbexchange 
-
-#### V2.1: display
-
-V2, but with a display to show what the arrow is pointing at.
-
-#### V2.2: GPS
-
-Automatically get time and location from a GPS receiver.
-
-#### V3.0: laser
-
-V2, but with a laser to point to interesting objects. The laser is controlled by the microcontroller and there is a safety interlock on the base, requiring the user to be present for use.
-
-#### V4.0: camera and astrometry.net
-
-To increase precision, the arrow incorporates a camera that looks at the sky and plate-solves. Probably _very_ unnecessary and may make things more complicated if plate-solving is used by day.
+[^1]: I motori hanno un voltaggio nominale di 9 e 12V, e dovrebbero funzionare con qualunque voltaggio tra 9 e 18V. Il computer di bordo tollera tra 6 e 21V. Le prove sono state fatte solo a 12V.
+  Il Trovastelle non consuma molto: 1W a 12V dovrebbe essere ben più che sufficiente.
