@@ -48,7 +48,7 @@ class CelestialCompass(object):
         led_pins_rgba = (5, 6, 13, 19),
         led_colors: dict = None,
     ):
-        logging.debug("Starting application")
+        logging.info("Starting application")
         self.running = False
         self.controller = controller
         self.observer = observer
@@ -69,7 +69,7 @@ class CelestialCompass(object):
         else:
             self.led_colors = led_colors
         
-        logging.debug("Setting up RGB manager")
+        logging.info("Setting up RGB manager")
         self.led_manager = RGBManager(
             R_LED=led_pins_rgba[0],
             G_LED=led_pins_rgba[1],
@@ -77,11 +77,11 @@ class CelestialCompass(object):
             A_LED=led_pins_rgba[3],
         )
         
-        logging.debug("Creating schedule")
+        logging.info("Creating schedule")
         self.update_schedule()
         
         if display_controller is None:
-            logging.debug("Setting up display controller")
+            logging.info("Setting up display controller")
             if simulated_display:
                 device = luma.emulator.device.capture()
                 self.display_controller = DisplayController(device=device)
@@ -91,7 +91,7 @@ class CelestialCompass(object):
             self.display_controller = display_controller
         
         self.refresh_rate_hz = refresh_rate_hz
-        logging.debug("Ready to run")
+        logging.info("Ready to run")
         self.running = True
         
     def calibrate(self):
@@ -101,7 +101,7 @@ class CelestialCompass(object):
         self.display_controller.display_calibration_data(self.controller.calibration_status)
         
     def update_schedule(self):
-        logging.debug("Updating schedule")
+        logging.info("Updating schedule")
         current_time = datetime.datetime.now(datetime.timezone.utc)
         attempts_to_add = 0
         # Clean up the head
@@ -147,7 +147,7 @@ class CelestialCompass(object):
         while self.running:
             
             # Get initial pose of arrow
-            logging.info("Getting alt-az")
+            logging.debug("Getting alt-az")
             self.controller.get_alt_az()
             
             # Clean up the schedule
@@ -159,10 +159,14 @@ class CelestialCompass(object):
             color = self.schedule[0]['color_rgb']
             self.led_manager.breathe_color_async(color, frequency_hz=0.5, duration_s=self.time_on_target_s)
 
-            
+            logged_observable_name = False
             while len(self.schedule) and self.schedule[0]['end_time']>datetime.datetime.now(datetime.timezone.utc):
                 observable = self.schedule[0]['observable']
-                logging.debug("Now displaying observable {}".format(observable.name))
+                if logged_observable_name is False:
+                    logging.info("Now displaying observable {}".format(observable.name))
+                    logged_observable_name = True
+                else:
+                    logging.debug("Now displaying observable {}".format(observable.name))
                 # Get alt and az of celestial object
                 
                 t = datetime.datetime.now(datetime.timezone.utc)

@@ -32,8 +32,13 @@ import numpy as np
 if __name__ == "__main__":
 
     # Logging config
-    logging.basicConfig(filename='myapp.log', level=logging.INFO)
-
+    logging.basicConfig(
+        format='%(asctime)s %(levelname)-8s %(message)s',
+        level=logging.INFO,
+        datefmt='%Y-%m-%d %H:%M:%S',
+        filename='trovastelle.log',
+    )
+    
     # LED config
     logging.debug("Configuring LEDs")
     R_LED = 5
@@ -101,7 +106,7 @@ if __name__ == "__main__":
         simulate_9dof=False,
         steps_per_turn_alt=2052,
         steps_per_turn_az=int(200*16/6),
-        az_offset_rad=-np.pi/4,
+        az_offset_rad=-np.pi/2, # HORRIBLE HACK! But works on Federico's desk, and YOLO
     )
 
     logging.debug("Configuring Trovastelle")
