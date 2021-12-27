@@ -2,9 +2,13 @@
 
 Il Trovastelle punta a oggetti interessanti nel cielo e sulla Terra. Sa dove trovare pianeti, lune, e asteroidi, missioni spaziali e satelliti, galassie e nebulose, e amici vicini e lontani.
 
+[![Il Trovastelle](https://user-images.githubusercontent.com/13908594/147487420-aa2a96c0-7592-4e2e-ad05-35a0fe9fd10d.png)](https://www.youtube.com/watch?v=bgFfTYJVfwA)
+
 ## Come funziona
 
 Il Trovastelle usa un accelerometro, una bussola, un giroscopio, e un orologio molto preciso per sapere dove trovare oggetti nel cielo.
+
+[Ecco un video del Trovastelle dall'accensione alle operazioni.]( https://youtu.be/bmjY_7tN_tI )
 
 ## Configurazione
 
