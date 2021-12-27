@@ -59,4 +59,4 @@ Quando la telemetria è attiva, Federico può collegarsi via ssh al Trovastelle,
 Il progetto Fusion 360 è [qui](https://a360.co/3moek6k).
 
 [^1]: I motori hanno un voltaggio nominale di 9 e 12V, e dovrebbero funzionare con qualunque voltaggio tra 9 e 18V. Il computer di bordo tollera tra 6 e 21V. Le prove sono state fatte solo a 12V.
-  Il Trovastelle non consuma molto: 1W a 12V dovrebbe essere ben più che sufficiente.
+  Il Trovastelle non consuma molto: 1A a 12V dovrebbe essere ben più che sufficiente.
