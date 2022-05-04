@@ -1,1 +1,8 @@
-[{"name": "Sele", "lon_deg_E": 0.3388028, "lat_deg_N": 46.5786531, "alt_m": 108}, {"name": "David", "lon_deg_E": -99.133333, "lat_deg_N": 19.433333, "alt_m": 2240}, {"name": "Flavio", "lon_deg_E": 2.2888966, "lat_deg_N": 48.8457733, "alt_m": 39}, {"name": "FedeF", "lon_deg_E": 8.8088578, "lat_deg_N": 45.658723, "alt_m": 244}, {"name": "Marzia", "lon_deg_E": 8.795686, "lat_deg_N": 45.6462893, "alt_m": 238}, {"name": "Rinaldini", "lon_deg_E": 8.7753137, "lat_deg_N": 45.6494564, "alt_m": 255}, {"name": "Inge", "lon_deg_E": -118.138686, "lat_deg_N": 34.1376481, "alt_m": 204}]
+[
+    {
+        "name": "federico3",
+        "lon_deg_E": -118.138686,
+        "lat_deg_N": 34.1376481,
+        "alt_m": 204
+    }
+]
