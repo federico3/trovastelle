@@ -43,10 +43,12 @@ class VisibilityWindow(object):
         verbose:bool=False,
     ):
         _alt_rad, _az_rad, _ = observable.observe_topocentric(
-        observer_lon_E_deg=observer.lon_rad*180./np.pi,
-        observer_lat_N_deg=observer.lat_rad*180./np.pi,
-        observer_h_m=observer.alt_m,
+            observer_lon_E_deg=observer.lon_rad*180./np.pi,
+            observer_lat_N_deg=observer.lat_rad*180./np.pi,
+            observer_h_m=observer.alt_m,
+            observing_time=observing_time,
         )
+        
         if _alt_rad >= self.min_alt_rad and _alt_rad <= self.max_alt_rad and _az_rad>=self.min_az_rad and _az_rad<=self.max_az_rad:
 #             if verbose:
 #                 print("{} is visible: alt {}, az {}".format(observable, _alt_rad, _az_rad))

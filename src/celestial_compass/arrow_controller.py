@@ -20,28 +20,32 @@
 from celestial_compass.observables import ObserverLLA
 import numpy as np
 import time
+import logging
 from scipy.spatial.transform import Rotation
 
 BOARD_AVAILABLE=False
 try:
     import board
-    import adafruit_bno055    
+    import adafruit_bno055
+    from adafruit_motorkit import MotorKit
+
     BOARD_AVAILABLE=True
 except NotImplementedError as e:
-    warnings.warn("Not on hardware!")
+    logging.warning("Not on hardware!")
     board = None
 
-import logging
-from adafruit_motorkit import MotorKit
-
 from adafruit_motor import stepper
+import logging
 
 import geomag
 import math
 
 class sim9dof(object):
-    def __init__(self, euler: list=(0,0,0)):
+    def __init__(self, euler: list=(0,0,0), quaternion: list=(1,0,0,0)):
         self.euler = euler
+        self.quaternion = quaternion
+        self.calibrated = True
+        self.calibration_status = (3,3,3,3)
         
 class simstepper(object):
     def __init__(self):
@@ -53,6 +57,8 @@ class simstepper(object):
     ):
         self._step += 1*direction
         return self._step
+    def release(self):
+        return True
 
 class ArrowController(object):
     """
@@ -150,7 +156,7 @@ class ArrowController(object):
         # Alt: between -pi and pi. If it is outside of -pi/2, pi/2, we are in trouble
         _alt_rad = (math.fmod(_alt_rad_raw+np.pi,2*np.pi)-np.pi)
         if (_alt_rad>np.pi/2.) or (_alt_rad<-np.pi/2.):
-            warnings.warn("WARNING: altitude {} is outside of {}-{} range".format(
+            logging.warning("WARNING: altitude {} is outside of {}-{} range".format(
             _alt_rad,-np.pi/2,np.pi/2))
         # Az: between -pi and pi
         _az_rad = (math.fmod(_az_rad_magnetic+np.pi,2*np.pi)-np.pi)

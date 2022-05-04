@@ -21,6 +21,7 @@ import os
 from skyfield.api import Loader, wgs84
 from celestial_compass.observables import ObservableSatellite
 import datetime
+import logging
 
 DATA_PATH = os.environ.get("CELESTIAL_COMPASS_DATA")
 load = Loader(DATA_PATH)

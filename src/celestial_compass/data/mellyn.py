@@ -19,12 +19,16 @@
 
 import os
 import json
+import logging
 
 from celestial_compass.observables import ObservableTerrestrialLocation
 
 DATA_PATH = os.environ.get("CELESTIAL_COMPASS_DATA")
 
-with open(os.path.join(DATA_PATH, 'mellyn.json'), 'r') as mellyn_file:
-    mellyn = json.load(mellyn_file)
+try:
+    with open(os.path.join(DATA_PATH, 'mellyn.json'), 'r') as mellyn_file:
+        mellyn = json.load(mellyn_file)
+except FileNotFoundError as e:
+    logging.error("File {} not found! Please add a JSON list with ")
 
 ObservableMellyn = [ObservableTerrestrialLocation(name=mellon['name'], data=mellon, type_name="Mellon") for mellon in mellyn]

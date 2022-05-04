@@ -21,22 +21,17 @@ from luma.core.interface.serial import i2c, spi, pcf8574
 from luma.core.interface.parallel import bitbang_6800
 from luma.core.render import canvas
 from luma.oled.device import ssd1306, ssd1309, ssd1325, ssd1331, sh1106, ws0010
+
 import os
 from PIL import ImageFont
 
-from luma.core.interface.serial import i2c, spi, pcf8574
-from luma.core.interface.parallel import bitbang_6800
-from luma.core.render import canvas
-from luma.oled.device import ssd1306, ssd1309, ssd1325, ssd1331, sh1106, ws0010
-import os
-from PIL import ImageFont
 import skyfield
-import warnings
+import logging
 
 def round_number_to_fixed_width(number, width):
     int_length = len(str(round(number)))
     if int_length>width:
-        warnings.warn("Number width {} is longer than max width {}".format(int_length, width))
+        logging.warning("Number width {} is longer than max width {}".format(int_length, width))
     if int_length>=width-1:
         formatter = "{:0.0f}"
     else:
