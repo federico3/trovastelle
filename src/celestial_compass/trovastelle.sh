@@ -1,4 +1,4 @@
 #!/bin/bash
 
 source /home/pi/.trovastelle
-python /home/pi/sky-finder/src/celestial_compass/trovastelle.py
+python /home/pi/trovastelle/src/celestial_compass/trovastelle.py

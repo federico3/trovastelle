@@ -6,7 +6,7 @@ After=network-online.target
 
 [Service]
 Type=oneshot
-ExecStart=/home/pi/sky-finder/data/fetch_celestrak_data.sh
+ExecStart=/home/pi/trovastelle/data/fetch_celestrak_data.sh
 
 [Install]
 WantedBy=multi-user.target
