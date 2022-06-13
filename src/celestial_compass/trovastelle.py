@@ -147,6 +147,8 @@ class trovastelle(object):
             steps_per_turn_alt=config.get("steppers",{}).get("steps_per_turn_alt",2052),
             steps_per_turn_az=config.get("steppers",{}).get("steps_per_turn_az",int(200*16/6)),
             az_offset_rad=-np.pi/2, # HORRIBLE HACK! But works on Federico's desk, and YOLO
+            alt_direction_up = config.get("steppers",{}).get("alt_direction_up", 2) , # 1 is forward, 2 is backwards
+            az_direction_cw = config.get("steppers",{}).get("az_direction_cw", 2) ,
         )
 
         logging.debug("Configuring Trovastelle")

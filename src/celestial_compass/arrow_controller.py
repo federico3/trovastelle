@@ -73,7 +73,9 @@ class ArrowController(object):
         ),
         az_offset_rad: float=0,
         simulate_motors: bool=False,
-        simulate_9dof: bool=False
+        simulate_9dof: bool=False,
+        alt_direction_up = stepper.BACKWARD,
+        az_direction_cw = stepper.BACKWARD,
     ):
         self.alt_rad = None
         self.az_rad = None
@@ -81,6 +83,8 @@ class ArrowController(object):
         self.steps_per_turn_alt = steps_per_turn_alt
         self.steps_per_turn_az = steps_per_turn_az
         self.observer = observer
+        self.alt_direction_up = alt_direction_up
+        self.az_direction_cw = az_direction_cw
         
         if simulate_9dof:
             self.bno055 = sim9dof()
@@ -217,16 +221,22 @@ class ArrowController(object):
 #         print("ALT steps: {} ({} deg)".format(steps_alt, (_alt_rad-self.alt_rad)*180/np.pi))
 #         print("AZ steps: {} ({} deg)".format(steps_az, (_az_rad-self.az_rad)*180/np.pi))
         if steps_alt>0:
-            direction_alt = stepper.BACKWARD #Alt stepper is flipped: a step FORWARD will decrease alt (lower nose)
+            direction_alt = self.alt_direction_up # stepper.BACKWARD #Alt stepper is flipped: a step FORWARD will decrease alt (lower nose)
             direction_sign_alt = 1
         else:
-            direction_alt = stepper.FORWARD
+            if self.alt_direction_up == stepper.FORWARD:
+                direction_alt = stepper.BACKWARD
+            else:
+                direction_alt = stepper.FORWARD
             direction_sign_alt = -1
         if steps_az>0:
-            direction_az = stepper.BACKWARD #Likewise for az: a step FORWARD will decrease az (turn ccw)
+            direction_az = self.az_direction_cw # stepper.BACKWARD #Likewise for az: a step FORWARD will decrease az (turn ccw)
             direction_sign_az = 1
         else:
-            direction_az = stepper.FORWARD
+            if self.az_direction_cw == stepper.FORWARD:
+                direction_az = stepper.BACKWARD
+            else:
+                direction_az = stepper.FORWARD
             direction_sign_az = -1
             
         # SINGLE, DOUBLE, INTERLEAVE, MICROSTEP

@@ -27,7 +27,9 @@
     "steppers":
     {
     	"steps_per_turn_alt": 2052,
-    	"steps_per_turn_az": 533
+    	"steps_per_turn_az": 533,
+		"alt_direction_up": 2, 
+		"az_direction_cw": 2
     },
     "observables_list":
     {
