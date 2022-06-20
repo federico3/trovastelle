@@ -109,7 +109,7 @@ class trovastelle(object):
         # }
 
         logging.debug("Configuring display")
-        simulated_display = config.get("simulated",{}).get("display",False),
+        simulated_display = config.get("simulated",{}).get("display",False)
         if simulated_display:
             import luma.emulator.device
             device = luma.emulator.device.capture()
@@ -193,6 +193,9 @@ class trovastelle(object):
             if len(req) == 2 and req[:2] == "GC":
                 logging.debug("Received request for config")
                 reply = json.dumps(self.config)
+            if len(req) == 2 and req[:2] == "":
+                logging.debug("Received request for calibration status")
+                reply = json.dumps(self.cc.controller.calibration_status)
             if len(req) == 2 and req[:2] == "GL":
                 logging.debug("Received request for list")
                 _schedule_json = []

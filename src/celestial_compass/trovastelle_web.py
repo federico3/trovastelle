@@ -77,6 +77,27 @@ class trovastelle_web_stateless(object):
                     logging.error("Malformed reply from server: %s", reply)
                     return None
 
+    def get_calibration(self):
+        command = 'GA'
+        request = str(command).encode()
+        logging.info("Sending (%s)", request)
+        context = zmq.Context()
+        client = context.socket(zmq.REQ)
+        client.connect(self.endpoint)
+
+        client.send(request)
+        while True:
+            if (client.poll(REQUEST_TIMEOUT) & zmq.POLLIN) != 0:
+                reply = client.recv().decode()
+                try:
+                    config = json.loads(reply)
+                    retries_left = REQUEST_RETRIES
+                    logging.info("Server replied OK (%s)", reply)
+                    return config
+                except ValueError:                    
+                    logging.error("Malformed reply from server: %s", reply)
+                    return None
+
     def set_configuration(self, config):
         command = "SL"+json.dumps(config)
         request = str(command).encode()
@@ -259,6 +280,15 @@ if __name__ == "__main__":
     @app.route("/list/", methods=['GET'])
     def process_list_request():
         _list = tw.get_list()
+        return app.response_class(
+            response=json.dumps(_list),
+            status=200,
+            mimetype='application/json'
+        )
+
+    @app.route("/calibration/", methods=['GET'])
+    def process_calibration_request():
+        _list = tw.get_calibration()
         return app.response_class(
             response=json.dumps(_list),
             status=200,
