@@ -72,7 +72,7 @@ class led_client(object):
 if __name__ == "__main__":
     import random, time
 
-    logging.basicConfig(format="%(levelname)s: %(message)s", level=logging.INFO)
+    # logging.basicConfig(format="%(levelname)s: %(message)s", level=logging.INFO)
 
     client = led_client(
         endpoint=SERVER_ENDPOINT,

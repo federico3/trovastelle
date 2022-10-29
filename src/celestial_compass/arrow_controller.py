@@ -35,7 +35,6 @@ except NotImplementedError as e:
     board = None
 
 from adafruit_motor import stepper
-import logging
 
 import geomag
 import math
