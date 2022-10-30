@@ -51,5 +51,6 @@
         "9dof": true,
         "motors": true,
         "display": true
-    }
+    },
+    "calibration_level": 3
 }
