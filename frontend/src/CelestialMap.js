@@ -191,8 +191,7 @@ class MyCelestialMap extends React.Component {
 
   }
 
-  
-  componentDidMount() {
+  updateMap() {
 
     // Celestial.date(Date());
 
@@ -243,20 +242,24 @@ class MyCelestialMap extends React.Component {
     // Closest distance between labels
     var PROXIMITY_LIMIT = 20;
 
+    var observables_list = this.props.list;
+    console.log("Outside list");
+    console.log(observables_list);
+
     Celestial.add({
-      type:"json",
-      file:"http://"+this.state.backend_uri+"/list/",
+      type:"line",
+      // file:"http://"+this.state.backend_uri+"/list/",
     
       callback: function(error, json) {
         if (error) return console.warn(error);
         // Load the geoJSON file and transform to correct coordinate system, if necessary 
-        var dsos = Celestial.getData(json);
-    
+        // var dsos = Celestial.getData(json);
+        console.log("DSOs");
+        // console.log(dsos);
+        console.log(observables_list);
         // Add to celestiasl objects container in d3
         Celestial.container.selectAll(".observables")
-          .data(dsos.features.filter(function(d) {
-            return true
-          }))
+          .data(observables_list.features)
           .enter().append("path")
           .attr("class", "observable");
         // Trigger redraw to display changes
@@ -317,6 +320,14 @@ class MyCelestialMap extends React.Component {
     Celestial.display(this.celestial_config);
     Celestial.location([this.props.observer.lat_deg_N,this.props.observer.lon_deg_E]);
 
+  }
+
+  componentDidMount() {
+    this.updateMap();
+  }
+
+  componentDidUpdate() {
+    this.updateMap();
   }
 
   render() {

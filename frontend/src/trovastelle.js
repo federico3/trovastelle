@@ -55,6 +55,7 @@ class Trovastelle extends React.Component {
     }
     
     componentDidMount() {
+        console.log("Component mounted, fetching stuff");
         fetch("http://"+this.backend_uri+"/list")
         .then(res => res.json())
         .then(
@@ -71,6 +72,8 @@ class Trovastelle extends React.Component {
             });
           }
         );
+        console.log("Fetched list, moving on");
+        console.log(this.state.list)
         fetch("http://"+this.backend_uri+"/observer")
         .then(res => res.json())
         .then(
@@ -189,7 +192,7 @@ class Trovastelle extends React.Component {
             />
             <CalibrationLevelSetter
               calibration_level={this.state.calibration_level}
-              set_calibration_level={(r)=> {this.setState({calibration_level: r.target.value}); return 0;}}
+              set_calibration_level={(r)=> {this.setState({calibration_level: parseInt(r.target.value)}); return 0;}}
             />
           </div>
           <div>
