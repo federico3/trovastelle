@@ -14,5 +14,33 @@ const StatelessCalibrationWidget = ({calibration}) =>
     )
   };
 
+  const CalibrationLevelSetter = ({calibration_level, set_calibration_level}) => 
+  {
+    console.log(calibration_level)
+    return(
+      <div id="set_calibration_level">
+          <h2> Calibration Level </h2>
+          <div>
+            <input
+              type="range"
+              id="calibration_level"
+              name="Calibration level"
+              min="1"
+              max="3"
+              step="1"
+              value={calibration_level}
+              onInput={set_calibration_level}  
+              list="cal_list"
+            />
+            <datalist id="cal_list">
+              <option value="1" label="Coarse"></option>
+              <option value="2" label="Medium"></option>
+              <option value="3" label="Fine"></option>
+          </datalist>
 
-export default StatelessCalibrationWidget;
+          </div>
+      </div>
+    )
+  };
+
+export {StatelessCalibrationWidget, CalibrationLevelSetter};

@@ -3,12 +3,13 @@ import React, { Component, useRef, useMemo } from 'react';
 
 import MyCelestialMap from './CelestialMap';
 import {ObserverMap} from './ObserverMap';
-import StatelessCalibrationWidget from './Calibration';
+import {StatelessCalibrationWidget, CalibrationLevelSetter} from './Calibration';
 import StatelessObservablesWidget from './Observables';
 import SimulatedWidget from './Simulated';
 import RefreshRateWidget from './RefreshRate';
 import ObservablesPropsWidget from './ObservablesProps';
 import HardwareWidget from './hardware';
+import { TargetsList } from './TargetsList';
 
 class Trovastelle extends React.Component {
     constructor(props) {
@@ -34,9 +35,10 @@ class Trovastelle extends React.Component {
                 "max_az_rad": 6.28
               },
             },
-            list: [],
+            list: {"features": []},
             simulated: {"led": true, "ndof": true, "motors": true, "display": true},
             refresh_rate_hz: 1.0,
+            calibration_level: 3,
             error: null,
         }
 
@@ -172,6 +174,9 @@ class Trovastelle extends React.Component {
             />
           </div>
           <div>
+            <TargetsList targets_list={this.state.list}/>
+          </div>
+          <div>
             <ObserverMap 
               observer={this.state.observer}
               locationUpdater={this.updateLocation}
@@ -181,6 +186,10 @@ class Trovastelle extends React.Component {
           <div>
             <StatelessCalibrationWidget 
               calibration={this.state.calibration}
+            />
+            <CalibrationLevelSetter
+              calibration_level={this.state.calibration_level}
+              set_calibration_level={(r)=> {this.setState({calibration_level: r.target.value}); return 0;}}
             />
           </div>
           <div>
@@ -216,51 +225,56 @@ class Trovastelle extends React.Component {
               }
             />
           </div>
-          <div>
-            <SimulatedWidget 
-              simulated={this.state.simulated}
-              checkSimulated={ {
-                "led":      ()=>{var sState = this.state.simulated; sState.led      =  !sState.led;     this.setState({simulated: sState}); return 0},
-                "9dof":     ()=>{var sState = this.state.simulated; sState["9dof"]  =  !sState["9dof"]; this.setState({simulated: sState}); return 0},
-                "motors":   ()=>{var sState = this.state.simulated; sState.motors   =  !sState.motors;  this.setState({simulated: sState}); return 0},
-                "display":  ()=>{var sState = this.state.simulated; sState.display  =  !sState.display; this.setState({simulated: sState}); return 0},
+          <details>
+            <summary>
+              <h2>Advanced settings</h2>
+            </summary>
+            <div>
+              <SimulatedWidget 
+                simulated={this.state.simulated}
+                checkSimulated={ {
+                  "led":      ()=>{var sState = this.state.simulated; sState.led      =  !sState.led;     this.setState({simulated: sState}); return 0},
+                  "9dof":     ()=>{var sState = this.state.simulated; sState["9dof"]  =  !sState["9dof"]; this.setState({simulated: sState}); return 0},
+                  "motors":   ()=>{var sState = this.state.simulated; sState.motors   =  !sState.motors;  this.setState({simulated: sState}); return 0},
+                  "display":  ()=>{var sState = this.state.simulated; sState.display  =  !sState.display; this.setState({simulated: sState}); return 0},
+                  }
                 }
-              }
-            />
-            {/* {Object.entries(this.state.simulated).map( ([key, value])=> `${key}: ${value} `)} */}
-          </div>
-          <div>
-            <RefreshRateWidget
-              refreshRate={this.state.refresh_rate_hz}
-              updateRefreshRate={ (r)=>{this.setState({refresh_rate_hz: parseFloat(r.target.value)});}}
-            />
-          </div>
-          <div>
-            <HardwareWidget
-              hardwareSettings={{
-                steppers: this.state.steppers,
-                led_color_scheme: this.state.led_color_scheme,
-                led_pins: this.state.led_pins,
-              }}
-              updateHardwareSettings={{
-                steppers: {
-                  steps_per_turn_alt: ((r)=> {var olState = this.state.steppers; olState.steps_per_turn_alt =   parseInt(r.target.value);   this.setState({steppers: olState}); return 0}),
-                  steps_per_turn_az: ((r)=> {var olState = this.state.steppers; olState.steps_per_turn_az =   parseInt(r.target.value);   this.setState({steppers: olState}); return 0}),
-                  alt_direction_up: ()=>{var sState = this.state.steppers; sState.alt_direction_up === 1 ? sState.alt_direction_up=2 : sState.alt_direction_up=1;     this.setState({steppers: sState}); return 0},
-                  az_direction_cw: ()=>{var sState = this.state.steppers; sState.az_direction_cw === 1 ? sState.az_direction_cw=2 : sState.az_direction_cw=1;     this.setState({steppers: sState}); return 0},
-                },
-                led_color_scheme: ()=>{var newColorScheme="strong"; this.state.led_color_scheme === "strong"? newColorScheme="pale": newColorScheme="strong"; this.setState({led_color_scheme: newColorScheme}); return 0;},
-                led_pins: {
-                  alpha: ((r)=> {var olState = this.state.led_pins; olState.alpha =   parseInt(r.target.value);   this.setState({led_pins: olState}); return 0}),
-                  red: ((r)=> {var olState = this.state.led_pins; olState.red =   parseInt(r.target.value);   this.setState({led_pins: olState}); return 0}),
-                  green: ((r)=> {var olState = this.state.led_pins; olState.green =   parseInt(r.target.value);   this.setState({led_pins: olState}); return 0}),
-                  blue: ((r)=> {var olState = this.state.led_pins; olState.blue =   parseInt(r.target.value);   this.setState({led_pins: olState}); return 0}),
-                  anode_high:()=> {var sState = this.state.led_pins; sState.anode_high=!sState.anode_high; this.setState({steppers: sState}); return 0},
-                  voltage_scale: ((r)=> {var olState = this.state.led_pins; olState.voltage_scale =   parseFloat(r.target.value);   this.setState({led_pins: olState}); return 0}),
-                }
-              }}
-            />
-          </div>
+              />
+              {/* {Object.entries(this.state.simulated).map( ([key, value])=> `${key}: ${value} `)} */}
+            </div>
+            <div>
+              <RefreshRateWidget
+                refreshRate={this.state.refresh_rate_hz}
+                updateRefreshRate={ (r)=>{this.setState({refresh_rate_hz: parseFloat(r.target.value)});}}
+              />
+            </div>
+            <div>
+              <HardwareWidget
+                hardwareSettings={{
+                  steppers: this.state.steppers,
+                  led_color_scheme: this.state.led_color_scheme,
+                  led_pins: this.state.led_pins,
+                }}
+                updateHardwareSettings={{
+                  steppers: {
+                    steps_per_turn_alt: ((r)=> {var olState = this.state.steppers; olState.steps_per_turn_alt =   parseInt(r.target.value);   this.setState({steppers: olState}); return 0}),
+                    steps_per_turn_az: ((r)=> {var olState = this.state.steppers; olState.steps_per_turn_az =   parseInt(r.target.value);   this.setState({steppers: olState}); return 0}),
+                    alt_direction_up: ()=>{var sState = this.state.steppers; sState.alt_direction_up === 1 ? sState.alt_direction_up=2 : sState.alt_direction_up=1;     this.setState({steppers: sState}); return 0},
+                    az_direction_cw: ()=>{var sState = this.state.steppers; sState.az_direction_cw === 1 ? sState.az_direction_cw=2 : sState.az_direction_cw=1;     this.setState({steppers: sState}); return 0},
+                  },
+                  led_color_scheme: ()=>{var newColorScheme="strong"; this.state.led_color_scheme === "strong"? newColorScheme="pale": newColorScheme="strong"; this.setState({led_color_scheme: newColorScheme}); return 0;},
+                  led_pins: {
+                    alpha: ((r)=> {var olState = this.state.led_pins; olState.alpha =   parseInt(r.target.value);   this.setState({led_pins: olState}); return 0}),
+                    red: ((r)=> {var olState = this.state.led_pins; olState.red =   parseInt(r.target.value);   this.setState({led_pins: olState}); return 0}),
+                    green: ((r)=> {var olState = this.state.led_pins; olState.green =   parseInt(r.target.value);   this.setState({led_pins: olState}); return 0}),
+                    blue: ((r)=> {var olState = this.state.led_pins; olState.blue =   parseInt(r.target.value);   this.setState({led_pins: olState}); return 0}),
+                    anode_high:()=> {var sState = this.state.led_pins; sState.anode_high=!sState.anode_high; this.setState({steppers: sState}); return 0},
+                    voltage_scale: ((r)=> {var olState = this.state.led_pins; olState.voltage_scale =   parseFloat(r.target.value);   this.setState({led_pins: olState}); return 0}),
+                  }
+                }}
+              />
+            </div>
+          </details>
         </div>
         );
     }

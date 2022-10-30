@@ -177,13 +177,18 @@ class ArrowController(object):
     def calibration_status(self):
         return self.bno055.calibration_status
     
-    def calibrate(self, max_tries=3, report_status_function=print):
+    def calibrate(self, max_tries=3, report_status_function=print, calibration_level=3):
         for _try in range(max_tries):
             for _alt in [-np.pi/4, 0, np.pi/4, np.pi/2-0.01,]:
                 _starting_az, _starting_alt = self.get_alt_az()
                 for _i in range(3):
-                    if self.bno055.calibrated is True:
-                        continue
+                    if calibration_level==3:
+                        if self.bno055.calibrated is True:
+                            continue
+                    else:
+                        # If every entry in calibration_statis is higher than calibration_level
+                        if (len(list(filter(lambda x: x>=calibration_level, self.bno055.calibration_status))) == len(self.bno055.calibration_status)):
+                            continue
                     report_status_function(self.bno055.calibration_status)
                     self.slew_to_alt_az(_alt, self.az_rad+2/3*np.pi,step_delay_s=0.01)
                     time.sleep(2)

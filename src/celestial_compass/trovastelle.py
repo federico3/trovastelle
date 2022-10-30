@@ -176,6 +176,7 @@ class trovastelle(object):
                 led_anode_high = led_anode_high,
                 led_voltage_scale = led_voltage_scale,
                 led_colors=color_schema.get(config.get("led_color_scheme","strong"), self.strong_colors_by_type),
+                calibration_level=config.get("calibration_level",3),
             )
     def calibrate(self):
         logging.info("Calibrating! Trovastelle")
@@ -290,6 +291,11 @@ class trovastelle(object):
                     self.cc.refresh_rate_hz = _config.get("observables_list",{}).get("refresh_rate_hz", 1.)
                     _update_schedule = True
                     self.config["observables_list"] = _config["observables_list"]
+
+                if "calibration_level" in _config.keys() and _config["calibration_level"] != self.config["calibration_level"]:
+                    logging.info("New calibration level - this will really take effect at the next restart")
+                    self.cc.calibration_level = _config["calibration_level"] # This line is quite ineffective, actually. The important thing is that the setting gets saved to disk.
+                    self.config["calibration_level"] = _config["calibration_level"]
 
                 if "led_color_scheme" in _config.keys() and _config["led_color_scheme"] != self.config["led_color_scheme"]:
                     logging.info("New color scheme")
