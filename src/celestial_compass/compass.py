@@ -23,12 +23,14 @@ from celestial_compass.observables import ObserverLLA#, Observable, ObservableTe
 from celestial_compass.led_manager import RGBManager
 from celestial_compass.display_manager import DisplayController, format_distance
 
+import luma.emulator.device
+
 import matplotlib.colors as mcolors
 import logging
 import datetime
-import time
 import numpy as np
 import random
+import asyncio
 
 class CelestialCompass(object):
     def __init__(
@@ -44,9 +46,11 @@ class CelestialCompass(object):
         display_controller: DisplayController=None,
         simulated_display: bool=False,
         simulated_led:bool=False,
-        simulated_motors:bool=False,
         led_pins_rgba = (5, 6, 13, 19),
+        led_anode_high = False,
+        led_voltage_scale = 1.,
         led_colors: dict = None,
+        calibration_level: int = 3,
     ):
         logging.info("Starting application")
         self.running = False
@@ -58,6 +62,7 @@ class CelestialCompass(object):
         self.schedule = []
         self.check_visible = check_visible
         self.visibility_window = visibility_window
+        self.calibration_level = calibration_level
         if led_colors is None:
             self.led_colors = {
                 'Mellon': "xkcd:pale",
@@ -70,12 +75,18 @@ class CelestialCompass(object):
             self.led_colors = led_colors
         
         logging.info("Setting up RGB manager")
-        self.led_manager = RGBManager(
-            R_LED=led_pins_rgba[0],
-            G_LED=led_pins_rgba[1],
-            B_LED=led_pins_rgba[2],
-            A_LED=led_pins_rgba[3],
-        )
+        self.simulated_led = simulated_led
+        if self.simulated_led:
+            self.led_manager = None
+        else:
+            self.led_manager = RGBManager(
+                R_LED=led_pins_rgba[0],
+                G_LED=led_pins_rgba[1],
+                B_LED=led_pins_rgba[2],
+                A_LED=led_pins_rgba[3],
+                anode_high=led_anode_high,
+                voltage_scale=led_voltage_scale,
+            )
         
         logging.info("Creating schedule")
         self.update_schedule()
@@ -92,12 +103,14 @@ class CelestialCompass(object):
         
         self.refresh_rate_hz = refresh_rate_hz
         logging.info("Ready to run")
+        self.logged_observable_name = False
         self.running = True
+        
         
     def calibrate(self):
         for _try in range(3):
             self.display_controller.display_calibration_data(self.controller.calibration_status)
-            self.controller.calibrate(max_tries=1, report_status_function=self.display_controller.display_calibration_data)
+            self.controller.calibrate(max_tries=1, report_status_function=self.display_controller.display_calibration_data, calibration_level=self.calibration_level)
         self.display_controller.display_calibration_data(self.controller.calibration_status)
         
     def update_schedule(self):
@@ -140,10 +153,37 @@ class CelestialCompass(object):
                 }
             )
         if attempts_to_add>=50*(self.target_list_length_s/self.time_on_target_s):
-            warnings.warn("Very little is visible right now!")
+            logging.warning("Very little is visible right now!")
 
+    async def run(self):
+        main_task = asyncio.create_task(self._run_main())
+        io_task = asyncio.create_task(self._run_listener())
+        await main_task
+        await io_task
     
-    def run(self):
+    async def _run_listener(self):
+        pass
+        # """ This is where you put your sockets, etc. """
+        # """ https://pyzmq.readthedocs.io/en/latest/api/zmq.asyncio.html """
+        # context = zmq.asyncio.Context()
+        # sock = context.socket(zmq.REP)
+        # sock.bind("tcp://*:5556")
+        # while True:
+        #     msg = await sock.recv() # waits for msg to be ready
+        #     # reply = await async_process(msg)
+        #     reply = json.dumps("config").encode()
+        #     await sock.send(reply)
+        # # sock = self.zmq_context.socket(zmq.PULL)
+        # # sock.bind(self.zmq_address)
+        # # while self.running:
+        # #     print("Still here!")
+        # #     msg = await sock.recv_multipart()
+        # #     print(msg)
+        # #     reply = "OK"
+        # #     await sock.send_multipart(reply)
+        # #     # await asyncio.sleep(1./self.refresh_rate_hz)
+
+    async def _run_main(self):
         while self.running:
             
             # Get initial pose of arrow
@@ -157,14 +197,15 @@ class CelestialCompass(object):
             # TODO Pulse LED appropriately
             logging.debug("Calling LED")
             color = self.schedule[0]['color_rgb']
-            self.led_manager.breathe_color_async(color, frequency_hz=0.5, duration_s=self.time_on_target_s)
+            if not self.simulated_led:
+                self.led_manager.breathe_color_async(color, frequency_hz=0.5, duration_s=self.time_on_target_s)
 
-            logged_observable_name = False
+            self.logged_observable_name = False
             while len(self.schedule) and self.schedule[0]['end_time']>datetime.datetime.now(datetime.timezone.utc):
                 observable = self.schedule[0]['observable']
-                if logged_observable_name is False:
+                if self.logged_observable_name is False:
                     logging.info("Now displaying observable {}".format(observable.name))
-                    logged_observable_name = True
+                    self.logged_observable_name = True
                 else:
                     logging.debug("Now displaying observable {}".format(observable.name))
                 # Get alt and az of celestial object
@@ -188,5 +229,8 @@ class CelestialCompass(object):
                     observable_dist=format_distance(distance),
                     )
                 
-                time.sleep(1./self.refresh_rate_hz)
-            self.led_manager._keep_breathing=False
+                await asyncio.sleep(1./self.refresh_rate_hz)
+                # time.sleep(1./self.refresh_rate_hz)
+            # Stop breathing, will restart at next loop around
+            if not self.simulated_led:
+                self.led_manager._keep_breathing=False

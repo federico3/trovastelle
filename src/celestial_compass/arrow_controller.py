@@ -20,19 +20,19 @@
 from celestial_compass.observables import ObserverLLA
 import numpy as np
 import time
+import logging
 from scipy.spatial.transform import Rotation
 
 BOARD_AVAILABLE=False
 try:
     import board
-    import adafruit_bno055    
+    import adafruit_bno055
+    from adafruit_motorkit import MotorKit
+
     BOARD_AVAILABLE=True
 except NotImplementedError as e:
-    warnings.warn("Not on hardware!")
+    logging.warning("Not on hardware!")
     board = None
-
-import logging
-from adafruit_motorkit import MotorKit
 
 from adafruit_motor import stepper
 
@@ -40,8 +40,11 @@ import geomag
 import math
 
 class sim9dof(object):
-    def __init__(self, euler: list=(0,0,0)):
+    def __init__(self, euler: list=(0,0,0), quaternion: list=(1,0,0,0)):
         self.euler = euler
+        self.quaternion = quaternion
+        self.calibrated = True
+        self.calibration_status = (3,3,3,3)
         
 class simstepper(object):
     def __init__(self):
@@ -53,6 +56,8 @@ class simstepper(object):
     ):
         self._step += 1*direction
         return self._step
+    def release(self):
+        return True
 
 class ArrowController(object):
     """
@@ -67,7 +72,9 @@ class ArrowController(object):
         ),
         az_offset_rad: float=0,
         simulate_motors: bool=False,
-        simulate_9dof: bool=False
+        simulate_9dof: bool=False,
+        alt_direction_up = stepper.BACKWARD,
+        az_direction_cw = stepper.BACKWARD,
     ):
         self.alt_rad = None
         self.az_rad = None
@@ -75,6 +82,8 @@ class ArrowController(object):
         self.steps_per_turn_alt = steps_per_turn_alt
         self.steps_per_turn_az = steps_per_turn_az
         self.observer = observer
+        self.alt_direction_up = alt_direction_up
+        self.az_direction_cw = az_direction_cw
         
         if simulate_9dof:
             self.bno055 = sim9dof()
@@ -150,7 +159,7 @@ class ArrowController(object):
         # Alt: between -pi and pi. If it is outside of -pi/2, pi/2, we are in trouble
         _alt_rad = (math.fmod(_alt_rad_raw+np.pi,2*np.pi)-np.pi)
         if (_alt_rad>np.pi/2.) or (_alt_rad<-np.pi/2.):
-            warnings.warn("WARNING: altitude {} is outside of {}-{} range".format(
+            logging.warning("WARNING: altitude {} is outside of {}-{} range".format(
             _alt_rad,-np.pi/2,np.pi/2))
         # Az: between -pi and pi
         _az_rad = (math.fmod(_az_rad_magnetic+np.pi,2*np.pi)-np.pi)
@@ -168,13 +177,18 @@ class ArrowController(object):
     def calibration_status(self):
         return self.bno055.calibration_status
     
-    def calibrate(self, max_tries=3, report_status_function=print):
+    def calibrate(self, max_tries=3, report_status_function=print, calibration_level=3):
         for _try in range(max_tries):
             for _alt in [-np.pi/4, 0, np.pi/4, np.pi/2-0.01,]:
                 _starting_az, _starting_alt = self.get_alt_az()
                 for _i in range(3):
-                    if self.bno055.calibrated is True:
-                        continue
+                    if calibration_level==3:
+                        if self.bno055.calibrated is True:
+                            continue
+                    else:
+                        # If every entry in calibration_statis is higher than calibration_level
+                        if (len(list(filter(lambda x: x>=calibration_level, self.bno055.calibration_status))) == len(self.bno055.calibration_status)):
+                            continue
                     report_status_function(self.bno055.calibration_status)
                     self.slew_to_alt_az(_alt, self.az_rad+2/3*np.pi,step_delay_s=0.01)
                     time.sleep(2)
@@ -211,16 +225,22 @@ class ArrowController(object):
 #         print("ALT steps: {} ({} deg)".format(steps_alt, (_alt_rad-self.alt_rad)*180/np.pi))
 #         print("AZ steps: {} ({} deg)".format(steps_az, (_az_rad-self.az_rad)*180/np.pi))
         if steps_alt>0:
-            direction_alt = stepper.BACKWARD #Alt stepper is flipped: a step FORWARD will decrease alt (lower nose)
+            direction_alt = self.alt_direction_up # stepper.BACKWARD #Alt stepper is flipped: a step FORWARD will decrease alt (lower nose)
             direction_sign_alt = 1
         else:
-            direction_alt = stepper.FORWARD
+            if self.alt_direction_up == stepper.FORWARD:
+                direction_alt = stepper.BACKWARD
+            else:
+                direction_alt = stepper.FORWARD
             direction_sign_alt = -1
         if steps_az>0:
-            direction_az = stepper.BACKWARD #Likewise for az: a step FORWARD will decrease az (turn ccw)
+            direction_az = self.az_direction_cw # stepper.BACKWARD #Likewise for az: a step FORWARD will decrease az (turn ccw)
             direction_sign_az = 1
         else:
-            direction_az = stepper.FORWARD
+            if self.az_direction_cw == stepper.FORWARD:
+                direction_az = stepper.BACKWARD
+            else:
+                direction_az = stepper.FORWARD
             direction_sign_az = -1
             
         # SINGLE, DOUBLE, INTERLEAVE, MICROSTEP

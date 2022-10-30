@@ -17,7 +17,41 @@
  along with Trovastelle.  If not, see <http://www.gnu.org/licenses/>.
 """
 
-import RPi.GPIO as GPIO
+class sim_GPIO_pin(object):
+    def __init__(self):
+        pass
+    def start(self, input):
+        pass
+    def stop(self):
+        pass
+    def ChangeDutyCycle(self,dutycycle):
+        pass
+
+class sim_GPIO(object):
+    def __init__(self):
+        self.BCM = None
+        self.IN = 1
+        self.OUT = 0
+        pass
+    def setmode(self, mode):
+        pass
+    def setup(self, pin, mode):
+        pass
+    def PWM(self,pin,dutycycle):
+        return sim_GPIO_pin()
+    def stop(self,):
+        pass
+    def cleanup(self,):
+        return
+
+import logging
+try:
+    import RPi.GPIO as GPIO
+    BOARD_AVAILABLE=True
+except (RuntimeError,ModuleNotFoundError) as e:
+    logging.warning("Not on hardware!")
+    GPIO = sim_GPIO()
+
 import time, datetime
 import numpy as np
 import threading
@@ -78,3 +112,50 @@ class RGBManager(object):
         _thread = threading.Thread(target=self.breathe_color, args=(RGB_color,frequency_hz, duration_s))
         _thread.start()
         self._keep_breathing=False
+
+if __name__ == "__main__":
+    import os, json
+    import zmq
+    import itertools
+
+    # logging.basicConfig(format="%(levelname)s: %(message)s", level=logging.INFO)
+
+    context = zmq.Context()
+    server = context.socket(zmq.REP)
+    server.bind("tcp://*:5555")
+
+    DATA_PATH = os.environ.get("CELESTIAL_COMPASS_DATA")
+
+    with open(os.path.join(DATA_PATH, 'config.json'), 'r') as config_file:
+        config = json.load(config_file)
+
+    RGBmgr = RGBManager(
+        R_LED=config.get("led_pins",{}).get("red",5),
+        G_LED=config.get("led_pins",{}).get("green",19),
+        B_LED=config.get("led_pins",{}).get("blue",6),
+        A_LED=config.get("led_pins",{}).get("alpha",13),
+        anode_high=config.get("led_pins",{}).get("anode_high",False),
+        voltage_scale=config.get("led_pins",{}).get("voltage_scale",1.),
+    )
+
+    for cycles in itertools.count():
+        # Wait for a request in blocking fashion
+        request = server.recv().decode()
+        logging.debug(request)
+        if len(request) == 1 and request[0] == 'Q':
+            RGBmgr._keep_breathing=False
+            reply = str("OK")+request
+        elif request[0] == '[' and request[-1] == ']':
+            _color = json.loads(request)
+            RGBmgr.breathe_color_async(RGB_color=_color, frequency_hz=.25, duration_s=600)
+            reply = str("OK")+request
+        else:
+            logging.warn("Request {} (length {}) is malformed!".format(request,len(request)))
+
+            reply = str('')
+        server.send(reply.encode())
+    # Listen to MQTT socket on a loop
+    # Whenever we get a new color message
+    #   RGBmgr.breathe_color_async(RGB_color=[1.,1.,1.], frequency_hz=.25, duration_s=10)
+    # If we get a "stop display" message
+    #   RGBmgr._keep_breathing=False

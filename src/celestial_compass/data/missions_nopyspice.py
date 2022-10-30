@@ -23,7 +23,7 @@ from skyfield.vectorlib import VectorFunction
 from skyfield.constants import AU_KM
 from spktype01 import SPKType01
 from jplephem.spk import SPK
-import warnings
+import logging
 import numpy as np
 import networkx as nx
 
@@ -46,7 +46,7 @@ class Type01Object(VectorFunction):
         except ValueError as ve:
             if k2 is None:
                 raise(ve)
-            warnings.warn("No segment from SSB 0 to {}, trying to find a transform".format(self.target))
+            logging.warning("No segment from SSB 0 to {}, trying to find a transform".format(self.target))
             # Let's build a graph of dependencies
             # First, is there a segment with the origin and one with the destination?
             found_center = False

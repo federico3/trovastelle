@@ -21,23 +21,18 @@ from luma.core.interface.serial import i2c, spi, pcf8574
 from luma.core.interface.parallel import bitbang_6800
 from luma.core.render import canvas
 from luma.oled.device import ssd1306, ssd1309, ssd1325, ssd1331, sh1106, ws0010
+
 import os
 from PIL import ImageFont
 
-from luma.core.interface.serial import i2c, spi, pcf8574
-from luma.core.interface.parallel import bitbang_6800
-from luma.core.render import canvas
-from luma.oled.device import ssd1306, ssd1309, ssd1325, ssd1331, sh1106, ws0010
-import os
-from PIL import ImageFont
 import skyfield
-import warnings
+import logging
 
 def round_number_to_fixed_width(number, width):
     int_length = len(str(round(number)))
     if int_length>width:
-        warnings.warn("Number width {} is longer than max width {}".format(int_length, width))
-    if int_length>=width-1:
+        logging.warning("Number width {} is longer than max width {}".format(int_length, width))
+    if int_length>=width-1: # Show the integer part only
         formatter = "{:0.0f}"
     else:
         formatter = "{:" + "0.{}".format(width-int_length-1)+"f}"
@@ -54,7 +49,8 @@ def format_distance(distance: skyfield.units.Distance, width=5):
 #     1 ly ~ 10^13 km
 #     1 au ~ 150M  (10~8 km)
 
-    distance_ly = distance.m/9460730472580800 # https://en.wikipedia.org/wiki/Light-year
+    # distance_ly = distance.m/9460730472580800 # https://en.wikipedia.org/wiki/Light-year
+    distance_ly = distance.au/63241.077
     if distance_ly>1e9:
         distance_str = round_number_to_fixed_width(distance_ly/1e9, width-1)+ "B LY"
     elif distance_ly>1e6:

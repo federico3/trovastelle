@@ -1,0 +1,16 @@
+{
+    "strong": {
+        "Mellon": "xkcd:hot green",
+        "Messier": "xkcd:bright orange",
+        "Mission": "xkcd:bright red",
+        "Planet": "xkcd:true blue",
+        "Satellite": "xkcd:very light purple"
+    },
+    "pale": {
+        "Mellon": "xkcd:pale",
+        "Messier": "xkcd:baby green",
+        "Mission": "xkcd:light periwinkle",
+        "Planet": "xkcd:pale mauve",
+        "Satellite": "xkcd:magenta"
+    }
+}

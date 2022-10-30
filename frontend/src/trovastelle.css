@@ -1,0 +1,15 @@
+.leaflet-container {
+width: 100%;
+aspect-ratio: 16 / 9;
+}
+
+input[type=range]{
+    width: 50%;
+}
+
+datalist {
+    display: flex;
+    justify-content: space-between;
+    width: 50%;
+  }
+  
