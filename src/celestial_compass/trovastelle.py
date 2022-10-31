@@ -34,7 +34,7 @@ import os, json
 import asyncio
 import zmq
 import zmq.asyncio
-from geojson import Feature, Point
+from geojson import Feature, Point, LineString
 
 
 def get_observables(
@@ -208,12 +208,29 @@ class trovastelle(object):
                 logging.debug("Received request for list")
                 _schedule_json = []
                 for scheduled_ix, scheduled in enumerate(self.cc.schedule):
-                    _alt_radians, _az_radians, _distance = scheduled['observable'].observe_topocentric(
+                    _ra_radians_start, _dec_radians_start, _distance = scheduled['observable'].observe_topocentric_ra_dec(
                         observer_lon_E_deg=self.cc.observer.lon_rad*180./np.pi,
                         observer_lat_N_deg=self.cc.observer.lat_rad*180./np.pi,
                         observer_h_m=self.cc.observer.alt_m,
                         observing_time=scheduled['start_time']
                         )
+                    _ra_radians_end, _dec_radians_end, _distance = scheduled['observable'].observe_topocentric_ra_dec(
+                        observer_lon_E_deg=self.cc.observer.lon_rad*180./np.pi,
+                        observer_lat_N_deg=self.cc.observer.lat_rad*180./np.pi,
+                        observer_h_m=self.cc.observer.alt_m,
+                        observing_time=scheduled['end_time']
+                        )
+                    # if (_ra_radians_start==_ra_radians_end and _dec_radians_start==_dec_radians_end):
+                    if True:
+                        _geometry = Point((
+                                _ra_radians_start*180/np.pi,
+                                _dec_radians_start*180/np.pi
+                            ))
+                    else:
+                        _geometry = LineString([
+                            (_ra_radians_start*180/np.pi,_dec_radians_start*180/np.pi),
+                            (_ra_radians_end*180/np.pi,  _dec_radians_end*180/np.pi)
+                            ])
                     _schedule_json.append(
                         Feature(
                             properties={
@@ -224,12 +241,10 @@ class trovastelle(object):
                                 "end_time": scheduled['end_time'].strftime("%m/%d/%Y, %H:%M:%S"),
                                 "color_rgb": scheduled['color_rgb']
                             },
-                            geometry=Point((
-                                _az_radians*180/np.pi,
-                                _alt_radians*180/np.pi
-                            )),
+                            geometry= _geometry
                         )
                     )
+
                 reply = json.dumps({"type":"FeatureCollection","features": _schedule_json})
             
             elif len(req) == 2 and req[:2] == "GP":
@@ -263,7 +278,10 @@ class trovastelle(object):
                         mellyn      = _config.get("observables",{}).get("mellyn",True),
                         messiers    = _config.get("observables",{}).get("messiers",True),
                     )
-                    self.cc.observables = _Observables
+                    # Very weird, this sometimes does not work. Some race condition?
+                    _updated_observables = self.cc.update_observables(_Observables)
+                    print("Updated observables: {}".format(_updated_observables))
+                    # self.cc.observables = _Observables
                     _update_schedule = True
                     self.config["observables"] = _config["observables"]
 
@@ -317,7 +335,6 @@ class trovastelle(object):
                 
                 # self.config = _config # We do this piecemeal
                 # Store configuration on disk!
-                print(self.config)
                 self.store_config(self.config)
 
                 if _update_schedule is True:
