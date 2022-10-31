@@ -4,7 +4,6 @@ const StatelessCalibrationWidget = ({calibration}) =>
   {
     return(
       <div id="calibration">
-          <h2> Calibration Status </h2>
           <div id="calibration-status">
             System: {calibration[0]}/3, 
             Gyroscope: {calibration[1]}/3, 
@@ -16,10 +15,8 @@ const StatelessCalibrationWidget = ({calibration}) =>
 
   const CalibrationLevelSetter = ({calibration_level, set_calibration_level}) => 
   {
-    console.log(calibration_level)
     return(
       <div id="set_calibration_level">
-          <h2> Calibration Level </h2>
           <div>
             <input
               type="range"

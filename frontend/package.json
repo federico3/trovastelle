@@ -6,6 +6,7 @@
     "@testing-library/jest-dom": "^5.15.0",
     "@testing-library/react": "^11.2.7",
     "@testing-library/user-event": "^12.8.3",
+    "bootstrap": "^5.2.2",
     "d3-celestial": "^0.7.35",
     "leaflet": "^1.7.1",
     "leaflet.locatecontrol": "^0.76.0",

@@ -1,5 +1,14 @@
-import './trovastelle.css';
 import React, { Component, useRef, useMemo } from 'react';
+
+
+// Bootstrap CSS
+import "bootstrap/dist/css/bootstrap.min.css";
+// Bootstrap Bundle JS
+import "bootstrap/dist/js/bootstrap.bundle.js";
+
+// My CSS
+import './trovastelle.css';
+// import './freelancer.css';
 
 import MyCelestialMap from './CelestialMap';
 import {ObserverMap} from './ObserverMap';
@@ -54,91 +63,88 @@ class Trovastelle extends React.Component {
       );
     }
     
-    componentDidMount() {
-        console.log("Component mounted, fetching stuff");
-        fetch("http://"+this.backend_uri+"/list")
-        .then(res => res.json())
-        .then(
-          (result) => {
-            this.setState({
-              active: true,
-              list: result
-            });
-          },
-          (error) => {
-            this.setState({
-              active: true,
-              error: error
-            });
-          }
-        );
-        console.log("Fetched list, moving on");
-        console.log(this.state.list)
-        fetch("http://"+this.backend_uri+"/observer")
-        .then(res => res.json())
-        .then(
-          (result) => {
-            this.setState({
-              observer: {
-                lat_deg_N: result.lat_deg_N,
-                lon_deg_E: result.lon_deg_E,
-                alt_m: result.alt_m,
-              }
-            });
-          },
-          (error) => {
-            this.setState({
-              error: error
-            });
-          }
-        );
+    fetchData = (myrequest) => {
+      fetch("http://"+this.backend_uri+"/list")
+      .then(res => res.json())
+      .then(
+        (result) => {
+          this.setState({
+            active: true,
+            list: result
+          });
+        },
+        (error) => {
+          this.setState({
+            active: true,
+            error: error
+          });
+        }
+      );
+      fetch("http://"+this.backend_uri+"/observer")
+      .then(res => res.json())
+      .then(
+        (result) => {
+          this.setState({
+            observer: {
+              lat_deg_N: result.lat_deg_N,
+              lon_deg_E: result.lon_deg_E,
+              alt_m: result.alt_m,
+            }
+          });
+        },
+        (error) => {
+          this.setState({
+            error: error
+          });
+        }
+      );
 
-        fetch("http://"+this.backend_uri+"/config")
-        .then(res => res.json())
-        .then(
-          (result) => {
-            this.setState({
-              active: true,
-              configuration: result,
-              observables: result.observables,
-              led_pins: result.led_pins,
-              led_color_scheme: result.led_color_scheme,
-              steppers: result.steppers,
-              observables_list: result.observables_list,
-              simulated: result.simulated,
-              refresh_rate_hz: result.refresh_rate_hz,
-            });
-          },
-          (error) => {
-            this.setState({
-              active: true,
-              error: error
-            });
-          }
-        );
-        fetch("http://"+this.backend_uri+"/calibration")
-        .then(res => res.json())
-        .then(
-          (result) => {
-            this.setState({
-              active: true,
-              calibration: result
-            });
-          },
-          (error) => {
-            this.setState({
-              active: true,
-              error: error
-            });
-          }
-        );
+      fetch("http://"+this.backend_uri+"/config")
+      .then(res => res.json())
+      .then(
+        (result) => {
+          this.setState({
+            active: true,
+            configuration: result,
+            observables: result.observables,
+            led_pins: result.led_pins,
+            led_color_scheme: result.led_color_scheme,
+            steppers: result.steppers,
+            observables_list: result.observables_list,
+            simulated: result.simulated,
+            refresh_rate_hz: result.refresh_rate_hz,
+            calibration_level: result.calibration_level,
+          });
+        },
+        (error) => {
+          this.setState({
+            active: true,
+            error: error
+          });
+        }
+      );
+      fetch("http://"+this.backend_uri+"/calibration")
+      .then(res => res.json())
+      .then(
+        (result) => {
+          this.setState({
+            active: true,
+            calibration: result
+          });
+        },
+        (error) => {
+          this.setState({
+            active: true,
+            error: error
+          });
+        }
+      );
+      if (typeof myrequest !== 'undefined'){
+        myrequest.preventDefault();
+      }
     }
 
-    componentDidUpdate(){
-      // If the state updated, send a POST request to the server
-      // Examine the output
-      // If the output has changed
-      // Update the state (which will trigger another componentDidUpdate!)
+    pushConfig = (myrequest) => {
       fetch(
         "http://"+this.backend_uri+"/config/",
         {
@@ -161,41 +167,105 @@ class Trovastelle extends React.Component {
           console.log(error)
         }
       );
+      if (typeof myrequest !== 'undefined'){
+        myrequest.preventDefault();
+      }
+      this.fetchData();
+    }
+
+    resetList = (myrequest) => {
+      fetch(
+        "http://"+this.backend_uri+"/list/",
+        {
+          method: 'DELETE',
+          headers: {
+            'Content-Type': 'application/json'
+          },
+          body: "",
+        }
+      )
+      .then(res => res.json())
+      .then(
+        (result) => {
+          console.log(result)
+        },
+        (error) => {
+          console.log(error)
+        }
+      );
+      if (typeof myrequest !== 'undefined'){
+        myrequest.preventDefault();
+      }
+      this.fetchData();
+    }
+
+    componentDidMount() {
+      this.fetchData();
+    }
+
+    componentDidUpdate(){
+      // If the state updated, send a POST request to the server
+      // Examine the output
+      // If the output has changed
+      // Update the state (which will trigger another componentDidUpdate!)
+      // this.pushConfig();
     }
 
     render() {
         return (
-        <div> <h1>Trovastelle!</h1> 
+        <div> 
+          <nav className="navbar navbar-fixed-top navbar-light bg-light">
+            <div className="container">
+              <span className="navbar-brand mb-0 h1">Trovastelle!</span>
+              <form onSubmit={this.fetchData}>
+                <input type="submit" className="btn btn-default navbar-btn" value="Fetch"/>
+              </form>
+              <form onSubmit={this.pushConfig}>
+                <input type="submit" className="btn btn-default navbar-btn" value="Upload"/>
+              </form>
+            </div>
+          </nav>
+          {/* <nav id="mainNav" className="navbar navbar-default navbar-fixed-top navbar-custom">
+            <div class="navbar-header page-scroll">
+              <button type="button" class="navbar-toggle" data-toggle="collapse" data-target="#bs-example-navbar-collapse-1">
+                  <span class="sr-only">Toggle navigation</span>
+                  <span class="icon-bar"></span>
+                  <span class="icon-bar"></span>
+                  <span class="icon-bar"></span>
+              </button>
+              <h1>Trovastelle!</h1>
+            </div>
+            <div class="collapse navbar-collapse" id="bs-example-navbar-collapse-1">
+                <ul class="nav navbar-nav navbar-right">
+                    <li class="page-scroll">
+                        <a href="#page-top">About</a>
+                    </li>
+                    <li class="page-scroll">
+                        <a href="#research">Research</a>
+                    </li>
+                </ul>
+            </div>
+          </nav> */}
+           
           <div>
-
-          </div>
-          <div>
+            <h2> Sky Map </h2>
             <MyCelestialMap
               backend_uri={this.backend_uri}
               observer={this.state.observer}
               list={this.state.list}
+              visibility_window={this.state.observables_list["visibility_window"]}
+              show_visibility_window={this.state.observables_list["check_visible"]}
             />
           </div>
           <div>
-            <TargetsList targets_list={this.state.list}/>
+            <h2> Targets </h2>
+            <TargetsList
+              targets_list={this.state.list}
+              reset_targets_list={this.resetList}
+              />
           </div>
           <div>
-            <ObserverMap 
-              observer={this.state.observer}
-              locationUpdater={this.updateLocation}
-            />
-          </div>
-
-          <div>
-            <StatelessCalibrationWidget 
-              calibration={this.state.calibration}
-            />
-            <CalibrationLevelSetter
-              calibration_level={this.state.calibration_level}
-              set_calibration_level={(r)=> {this.setState({calibration_level: parseInt(r.target.value)}); return 0;}}
-            />
-          </div>
-          <div>
+            <h2>Observables</h2>
             <StatelessObservablesWidget 
               observables={this.state.observables}
               checkObservables={ {
@@ -210,6 +280,7 @@ class Trovastelle extends React.Component {
             />
           </div>
           <div>
+            <h2>Observable properties</h2>
             <ObservablesPropsWidget
               observablesProps= {this.state.observables_list}
               updateObservablesProps=
@@ -228,11 +299,31 @@ class Trovastelle extends React.Component {
               }
             />
           </div>
+          <div>
+            <h2> Observer </h2>
+            <ObserverMap 
+              observer={this.state.observer}
+              locationUpdater={this.updateLocation}
+            />
+          </div>
+          <div>
+            <h2> Calibration </h2>
+            <h3> Status </h3>
+            <StatelessCalibrationWidget 
+              calibration={this.state.calibration}
+            />
+            <h3>Level</h3>
+            <CalibrationLevelSetter
+              calibration_level={this.state.calibration_level}
+              set_calibration_level={(r)=> {this.setState({calibration_level: parseInt(r.target.value)}); return 0;}}
+            />
+          </div>
           <details>
             <summary>
-              <h2>Advanced settings</h2>
+              Advanced settings
             </summary>
             <div>
+              <h3>Simulation</h3>
               <SimulatedWidget 
                 simulated={this.state.simulated}
                 checkSimulated={ {
@@ -246,12 +337,14 @@ class Trovastelle extends React.Component {
               {/* {Object.entries(this.state.simulated).map( ([key, value])=> `${key}: ${value} `)} */}
             </div>
             <div>
+              <h3>Hardware refresh rate</h3>
               <RefreshRateWidget
                 refreshRate={this.state.refresh_rate_hz}
                 updateRefreshRate={ (r)=>{this.setState({refresh_rate_hz: parseFloat(r.target.value)});}}
               />
             </div>
             <div>
+            <h3>Stepper motors and LEDs</h3>
               <HardwareWidget
                 hardwareSettings={{
                   steppers: this.state.steppers,

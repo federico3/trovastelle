@@ -4,7 +4,6 @@ const ObservablesPropsWidget = ({observablesProps, updateObservablesProps}) =>
 {
     return(
         <div id="observablesProps">
-            <h2> Observables Properties </h2>
             {/* {Object.entries(observables).map( ([key, value])=> `${key}: ${value} `)} */}
             <div>
                 <label htmlFor="time_on_target_s">Time on target [s]:</label>

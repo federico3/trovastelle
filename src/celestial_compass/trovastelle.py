@@ -239,7 +239,7 @@ class trovastelle(object):
 
             elif len(req) >=2 and req[:2] == "SC":
                 _config = json.loads(req[2:])
-                logging.warning("Processing new dictionary!")
+                logging.info("Processing new dictionary!")
                 # print(_config)
                 # Dynamic update behavior:
                 # - Update observer: update cc.observer, set cc.schedule = [], call cc.update_schedule()
@@ -364,6 +364,14 @@ class trovastelle(object):
                     
                 # reply = await async_process(msg)
                 reply = reply_code+json.dumps(self.config["observer"])
+
+            elif len(req) >=2 and req[:2] == "DL":
+                logging.info("Received request to delete and reset schedule list")
+                self.cc.schedule = []
+                self.cc.update_schedule()
+                reply = "OK";
+            else:
+                reply = "NO";
             await sock.send(reply.encode())
 
     async def run(self):
@@ -402,7 +410,7 @@ if __name__ == "__main__":
 
     def store_config(config_data):
         with open(os.path.join(DATA_PATH, 'config.json'), 'w') as config_file:
-            json.dump(config_data, config_file)
+            json.dump(config_data, config_file,indent=2)
     
     ts = trovastelle(config=config, color_schema=color_schema, store_config=store_config)
 

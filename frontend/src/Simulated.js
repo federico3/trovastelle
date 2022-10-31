@@ -4,7 +4,6 @@ const SimulatedWidget = ({simulated, checkSimulated}) =>
 {
     return(
         <div id="simulated">
-            <h2> Simulated </h2>
                 {/* {Object.entries(simulated).map( ([key, value])=> `${key}: ${value} `)} */}
                 <div>
                 <input type="checkbox" id="simulated-led" checked={simulated.led} onChange={checkSimulated.led} name="simulated-led" value="LED"/>

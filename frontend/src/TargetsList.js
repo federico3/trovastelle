@@ -1,13 +1,12 @@
 import React, { Component } from "react";
 
-const TargetsList = ({targets_list}) => 
+const TargetsList = ({targets_list, reset_targets_list}) => 
 {
     let targets_table = targets_list.features.map(
         (target) => <Target target_properties={target}/> 
     );
     return(
         <div id="Targets">
-            <h2> Targets </h2>
             <table className="styled-table">
                 <thead>
                     <tr key="header">
@@ -25,6 +24,9 @@ const TargetsList = ({targets_list}) =>
                     {targets_table}
                 </tbody>
             </table>
+            <form onSubmit={reset_targets_list}>
+                <input type="submit" className="btn btn-default" value="Reset"/>
+              </form>
         </div>
     );
 };
