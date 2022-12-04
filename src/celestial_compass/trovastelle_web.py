@@ -330,8 +330,7 @@ class trovastelle_web_stateless(object):
 #             logging.info("Resending (%s)", request)
 #             self.client.send(request)
 
-
-if __name__ == "__main__":
+def trovastelle_web_app():
     logging.basicConfig(
         format='%(asctime)s %(levelname)-8s %(message)s',
         level=logging.DEBUG,
@@ -441,6 +440,12 @@ if __name__ == "__main__":
                     status=201,
                     mimetype='application/json'
                 )
+
+    return app
+
+if __name__ == "__main__":
+    
+    app = trovastelle_web_app()
 
     app.run(port=5005)
     # with open(os.path.join(DATA_PATH, 'config.json'), 'r') as config_file:
