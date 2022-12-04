@@ -85,9 +85,9 @@ class Type01Object(VectorFunction):
 DATA_PATH = os.environ.get("CELESTIAL_COMPASS_DATA")
 load = Loader(DATA_PATH)
     
-v1_kernel_file = os.path.join(DATA_PATH,'Voyager_1.a54206u_V0.2_merged.bsp')
+v1_kernel_file = os.path.join(DATA_PATH,'VGR/Voyager_1.a54206u_V0.2_merged.bsp')
 # v1_kernel_file = 'data/voyager_1.ST+1991_a54418u.merged.bsp'
-v2_kernel_file = os.path.join(DATA_PATH,'Voyager_2.m05016u.merged.bsp')
+v2_kernel_file = os.path.join(DATA_PATH,'VGR/Voyager_2.m05016u.merged.bsp')
 # v2_kernel_file = 'data/voyager_2.ST+1992_m05208u.merged.bsp'
 
 

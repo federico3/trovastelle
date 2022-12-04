@@ -96,10 +96,13 @@ class CelestialCompass(object):
             if simulated_display:
                 device = luma.emulator.device.capture()
                 self.display_controller = DisplayController(device=device)
+                logging.info("Using simulated display in compass")
             else:
                 self.display_controller = DisplayController()
+                logging.info("Using real display in compass")
         else:
             self.display_controller = display_controller
+            logging.info("Using externally-created display in compass")
         
         self.refresh_rate_hz = refresh_rate_hz
         logging.info("Ready to run")

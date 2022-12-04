@@ -116,8 +116,10 @@ class trovastelle(object):
             import luma.emulator.device
             device = luma.emulator.device.capture()
             display_controller = DisplayController(device=device)
+            logging.info("Using simulated display in trovastelle")
         else:
             display_controller = DisplayController()
+            logging.info("Using real display in trovastelle")
         display_controller.display_fullscreen_text("Trovastelle")
 
 
