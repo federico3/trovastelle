@@ -48,7 +48,7 @@ import logging
 try:
     import RPi.GPIO as GPIO
     BOARD_AVAILABLE=True
-except RuntimeError as e:
+except (RuntimeError,ModuleNotFoundError) as e:
     logging.warning("Not on hardware!")
     GPIO = sim_GPIO()
 
@@ -118,7 +118,7 @@ if __name__ == "__main__":
     import zmq
     import itertools
 
-    logging.basicConfig(format="%(levelname)s: %(message)s", level=logging.INFO)
+    # logging.basicConfig(format="%(levelname)s: %(message)s", level=logging.INFO)
 
     context = zmq.Context()
     server = context.socket(zmq.REP)

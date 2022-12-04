@@ -21,5 +21,6 @@ pillow
 tzwhere
 zmq
 flask
+flask-cors
 geojson
 # Needs sudo apt-get install libgeos-dev

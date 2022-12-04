@@ -50,6 +50,7 @@ class CelestialCompass(object):
         led_anode_high = False,
         led_voltage_scale = 1.,
         led_colors: dict = None,
+        calibration_level: int = 3,
     ):
         logging.info("Starting application")
         self.running = False
@@ -61,6 +62,7 @@ class CelestialCompass(object):
         self.schedule = []
         self.check_visible = check_visible
         self.visibility_window = visibility_window
+        self.calibration_level = calibration_level
         if led_colors is None:
             self.led_colors = {
                 'Mellon': "xkcd:pale",
@@ -111,9 +113,13 @@ class CelestialCompass(object):
     def calibrate(self):
         for _try in range(3):
             self.display_controller.display_calibration_data(self.controller.calibration_status)
-            self.controller.calibrate(max_tries=1, report_status_function=self.display_controller.display_calibration_data)
+            self.controller.calibrate(max_tries=1, report_status_function=self.display_controller.display_calibration_data, calibration_level=self.calibration_level)
         self.display_controller.display_calibration_data(self.controller.calibration_status)
         
+    def update_observables(self, new_observables):
+        self.observables = new_observables
+        return True
+
     def update_schedule(self):
         logging.info("Updating schedule")
         current_time = datetime.datetime.now(datetime.timezone.utc)
