@@ -10,9 +10,9 @@ class MyCelestialMap extends React.Component {
   constructor(props) {
       super(props);
       this.state = {
-        list: props.list,
+        // list: props.list,
         backend_uri: props.backend_uri,
-        observer: props.observer
+        // observer: props.observer
       }
 
       this.celestial_config = { 
@@ -55,8 +55,8 @@ class MyCelestialMap extends React.Component {
         container: "celestial-map",   // ID of parent element, e.g. div, null = html-body
         datapath: "https://ofrohn.github.io/data/",  // Path/URL to data files, empty = subfolder 'data'
         stars: {
-          show: true,    // Show stars
-          limit: 6,      // Show only stars brighter than limit magnitude
+          show: false,    // Show stars
+          limit: 2,      // Show only stars brighter than limit magnitude
           colors: true,  // Show stars in spectral colors, if not use default color
           style: { fill: "#ffffff", opacity: 1 }, // Default style for stars
           designation: true, // Show star names (Bayer, Flamsteed, Variable star, Gliese or designation, 
@@ -115,7 +115,7 @@ class MyCelestialMap extends React.Component {
           }
         },
         planets: {  //Show planet locations, if date-time is set
-          show: false,
+          show: true,
           // List of all objects to show
           which: ["sol", "mer", "ven", "ter", "lun", "mar", "jup", "sat", "ura", "nep"],
           // Font styles for planetary symbols
@@ -191,8 +191,7 @@ class MyCelestialMap extends React.Component {
 
   }
 
-  
-  componentDidMount() {
+  updateMap() {
 
     // Celestial.date(Date());
 
@@ -208,13 +207,25 @@ class MyCelestialMap extends React.Component {
     //   baseline: "bottom"
     // };
 
+    var lineStyle = { 
+      stroke:"#f00", 
+      fill: "rgba(255, 204, 204, 0.4)",
+      width:3 
+    };
+    var textStyle = { 
+      fill:"#f00", 
+      font: "bold 15px Helvetica, Arial, sans-serif", 
+      align: "center", 
+      baseline: "bottom" 
+    };
+
     function colorfulPointStyle(color_rgb) {
       return(
         {
           stroke: "rgba("+
-            color_rgb[0]*255+", "+
-            color_rgb[1]*255+", "+
-            color_rgb[2]*255+", "+
+            255+", "+
+            255+", "+
+            255+", "+
             "1)",
           fill: "rgba("+
           color_rgb[0]*255+", "+
@@ -229,10 +240,15 @@ class MyCelestialMap extends React.Component {
       return(
         {
           fill:"rgba("+
-          color_rgb[0]*255+", "+
-          color_rgb[1]*255+", "+
-          color_rgb[2]*255+", "+
+          255+", "+
+          255+", "+
+          255+", "+
           "1)",
+          stroke: "rgba("+
+            color_rgb[0]*255+", "+
+            color_rgb[1]*255+", "+
+            color_rgb[2]*255+", "+
+            "1)",
           font: "normal bold 15px Helvetica, Arial, sans-serif",
           align: "left",
           baseline: "bottom"
@@ -243,20 +259,25 @@ class MyCelestialMap extends React.Component {
     // Closest distance between labels
     var PROXIMITY_LIMIT = 20;
 
+    // Add observables
+    var observables_list = this.props.list;
+
+    var vis_window = this.props.visibility_window;
+
     Celestial.add({
-      type:"json",
-      file:"http://"+this.state.backend_uri+"/list/",
+      type:"line",
+      // file:"http://"+this.state.backend_uri+"/list/",
     
       callback: function(error, json) {
         if (error) return console.warn(error);
         // Load the geoJSON file and transform to correct coordinate system, if necessary 
-        var dsos = Celestial.getData(json);
-    
+        // var dsos = Celestial.getData(json);
         // Add to celestiasl objects container in d3
+        // First, wipe the old objects.
+        Celestial.container.selectAll(".observable").remove();
+
         Celestial.container.selectAll(".observables")
-          .data(dsos.features.filter(function(d) {
-            return true
-          }))
+          .data(observables_list.features)
           .enter().append("path")
           .attr("class", "observable");
         // Trigger redraw to display changes
@@ -314,15 +335,101 @@ class MyCelestialMap extends React.Component {
       return Math.sqrt(d1 * d1 + d2 * d2);
     }
 
+    // Add visibility window
+    // if (this.props.show_visibility_window){
+    if (false){
+      var visibility_window_geojson = {
+        "type":"FeatureCollection",
+        // this is an array, add as many objects as you want
+        "features":[
+          {"type":"Feature",
+          "id":"visibility_window",
+          "properties": {
+            // Name
+            "n":"Visibility Window",
+            // Location of name text on the map
+            "loc": [-67.5, 52]
+          }, "geometry":{
+            // the line object as an array of point coordinates, 
+            // always as [ra -180..180 degrees, dec -90..90 degrees]
+            "type":"MultiLineString",
+            "coordinates":[[
+              [this.props.visibility_window.min_az_rad*180/Math.PI, this.props.visibility_window.min_alt_rad*180/Math.PI],
+              [this.props.visibility_window.min_az_rad*180/Math.PI, this.props.visibility_window.max_alt_rad*180/Math.PI],
+              [this.props.visibility_window.max_az_rad*180/Math.PI, this.props.visibility_window.max_alt_rad*180/Math.PI],
+              [this.props.visibility_window.max_az_rad*180/Math.PI, this.props.visibility_window.min_alt_rad*180/Math.PI],
+              [this.props.visibility_window.min_az_rad*180/Math.PI, this.props.visibility_window.min_alt_rad*180/Math.PI]
+            ]]
+          }
+          }  
+        ]
+      };
+
+      Celestial.add({
+        type: "line",
+        callback: function(error, json) {
+          if (error) return console.warn(error);
+          // Load the geoJSON file and transform to correct coordinate system, if necessary
+          var visibility_window_Celestial = Celestial.getData(visibility_window_geojson);
+      
+          // Add to celestial objects container in d3
+          Celestial.container.selectAll(".visibility_windows").remove();
+          Celestial.container.selectAll("visibility_window").remove();
+          Celestial.container.selectAll(".visibility_window").remove();
+          console.log("Removes viswindow");
+          Celestial.container.selectAll(".visibility_windows")
+            .data(visibility_window_Celestial.features)
+            .enter().append("path")
+            .attr("class", "visibility_window"); 
+          // Trigger redraw to display changes
+          Celestial.redraw();
+        },
+        redraw: function() {   
+          // Select the added objects by class name as given previously
+          Celestial.container.selectAll(".visibility_window").each(function(d) {
+            // Set line styles 
+            Celestial.setStyle(lineStyle);
+            // Project objects on map
+            Celestial.map(d);
+            // draw on canvas
+            Celestial.context.fill();
+            Celestial.context.stroke();
+            
+            // If point is visible (this doesn't work automatically for points)
+            if (Celestial.clip(d.properties.loc)) {
+              // get point coordinates
+              var pt = Celestial.mapProjection(d.properties.loc);
+              // Set text styles       
+              Celestial.setTextStyle(textStyle);
+              // and draw text on canvas
+              Celestial.context.fillText(d.properties.n, pt[0], pt[1]);
+            }      
+          })
+        }
+      }
+      )
+    } else {
+      // Celestial.container.selectAll(".visibility_windows").remove();
+      // Celestial.container.selectAll("visibility_window").remove();
+      // Celestial.container.selectAll(".visibility_window").remove();
+    };
+
     Celestial.display(this.celestial_config);
     Celestial.location([this.props.observer.lat_deg_N,this.props.observer.lon_deg_E]);
 
   }
 
+  componentDidMount() {
+    this.updateMap();
+  }
+
+  componentDidUpdate() {
+    this.updateMap();
+  }
+
   render() {
       return(
           <div>
-              <h2> Sky Map </h2>
               {/* <div> {this.state.list.toString()}</div> */}
               <div id="celestial-map"></div>
               <div id="celestial-form"></div>

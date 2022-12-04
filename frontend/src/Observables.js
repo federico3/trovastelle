@@ -33,7 +33,6 @@ const StatelessObservablesWidget = ({observables, checkObservables}) =>
 {
     return(
         <div id="observables">
-            <h2> Observables </h2>
             {/* {Object.entries(observables).map( ([key, value])=> `${key}: ${value} `)} */}
             <div>
               <input type="checkbox" id="observables-satellites" checked={observables.satellites} onChange={checkObservables.satellites} name="observables-satellites" value="Satellites"/>

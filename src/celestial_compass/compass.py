@@ -113,6 +113,10 @@ class CelestialCompass(object):
             self.controller.calibrate(max_tries=1, report_status_function=self.display_controller.display_calibration_data, calibration_level=self.calibration_level)
         self.display_controller.display_calibration_data(self.controller.calibration_status)
         
+    def update_observables(self, new_observables):
+        self.observables = new_observables
+        return True
+
     def update_schedule(self):
         logging.info("Updating schedule")
         current_time = datetime.datetime.now(datetime.timezone.utc)

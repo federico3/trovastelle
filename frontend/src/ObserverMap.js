@@ -189,7 +189,6 @@ class ObserverMap extends React.Component{
 
     return(
       <div>
-        <h2> Observer </h2>
       <div> Click on the map to set the observer's location.
         <button onClick={this.geolocate}>📍 Find my position.</button>
         <span id="geolocationStatus">{this.geolocationStatusSpan()}</span>

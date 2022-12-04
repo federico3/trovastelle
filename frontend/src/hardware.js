@@ -4,7 +4,7 @@ const HardwareWidget = ({hardwareSettings, updateHardwareSettings}) =>
 {
     return(
         <div id="hardware">
-            <h2> Stepper Motors </h2>
+            <h4> Stepper Motors </h4>
                 {/* {Object.entries(simulated).map( ([key, value])=> `${key}: ${value} `)} */}
                 <div>
                     <label htmlFor="stepper_steps_per_turn_alt">Steps per turn (alt):</label>
@@ -25,12 +25,12 @@ const HardwareWidget = ({hardwareSettings, updateHardwareSettings}) =>
                     <label htmlFor="stepper_az_direction_cw"> Azimuth stepper forward motion drives the arrow clockwise</label>
                 </div>
 
-                <h2> LEDs </h2>
+                <h4> LEDs </h4>
                 <div>
                     <input type="checkbox" id="led_color_scheme" checked={hardwareSettings.led_color_scheme === "strong"} onChange={updateHardwareSettings.led_color_scheme} name="led_color_scheme_strong" value="led_color_scheme_strong"/>
                     <label htmlFor="led_color_scheme"> Vibrant LED colors on power LED </label>
                 </div>
-                <h3> LED pins </h3>
+                <h5> LED pins </h5>
                 <div>
                     <label htmlFor="led_pin_alpha">Alpha</label>
                     <input type="number" step="1" label="led_pin_alpha" value={hardwareSettings.led_pins.alpha} onInput={updateHardwareSettings.led_pins.alpha}/>

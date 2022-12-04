@@ -101,6 +101,25 @@ class trovastelle_web_stateless(object):
                     logging.error("Malformed reply from server (%s): %s", command[:2], reply)
                     return None
 
+    def delete_list(self):
+        command = 'DL'
+        request = str(command).encode()
+        logging.info("Sending (%s)", request)
+        context = zmq.Context()
+        client = context.socket(zmq.REQ)
+        client.connect(self.endpoint)
+
+        client.send(request)
+        while True:
+            if (client.poll(REQUEST_TIMEOUT) & zmq.POLLIN) != 0:
+                reply = client.recv().decode()
+                if reply[:2] != "OK":
+                    logging.warning("Warning: non-OK reply from Trovastelle")
+                    return False
+                else:
+                    return True
+
+
     def get_calibration(self):
         command = 'GA'
         request = str(command).encode()
@@ -353,14 +372,30 @@ if __name__ == "__main__":
                     mimetype='application/json'
                 )
 
-    @app.route("/list/", methods=['GET'])
+    @app.route("/list/", methods=['GET','DELETE'])
     def process_list_request():
-        _list = tw.get_list()
-        return app.response_class(
-            response=json.dumps(_list),
-            status=200,
-            mimetype='application/json'
-        )
+        if request.method == 'GET':
+            _list = tw.get_list()
+            return app.response_class(
+                response=json.dumps(_list),
+                status=200,
+                mimetype='application/json'
+            )
+        elif request.method == 'DELETE':
+            _reply = tw.delete_list()
+            if _reply:
+                _list = tw.get_list()
+                return app.response_class(
+                    response=json.dumps(_list),
+                    status=200,
+                    mimetype='application/json'
+                )
+            else:
+                return app.response_class(
+                    response="Error!",
+                    status=500,
+                    mimetype='application/json'
+                )
 
     @app.route("/calibration/", methods=['GET'])
     def process_calibration_request():
