@@ -64,17 +64,17 @@ def get_observables(
     from celestial_compass.data.messier import ObservableMessiers
 
     Observables = []
-    if config.get("observables",{}).get("satellites",True):
+    if satellites:
         Observables += ObservableSatellites
-    if config.get("observables",{}).get("missions",True):
+    if missions:
         Observables += ObservableMissions
-    if config.get("observables",{}).get("planets",True):
+    if planets:
         Observables += ObservablePlanets
-    if config.get("observables",{}).get("smallbodies",False):
+    if smallbodies:
         Observables += ObservableSmallBodies
-    if config.get("observables",{}).get("mellyn",True):
+    if mellyn:
         Observables += ObservableMellyn
-    if config.get("observables",{}).get("messiers",True):
+    if messiers:
         Observables += ObservableMessiers
     
     return Observables
@@ -272,6 +272,7 @@ class trovastelle(object):
                 _restart = False
                 if "observables" in _config.keys() and _config["observables"] != self.config["observables"]:
                     logging.info("New observables")
+                    logging.debug("Fetching new observables: {}".format(_config.get("observables",{})))
                     _Observables = get_observables(
                         satellites  = _config.get("observables",{}).get("satellites",True),
                         missions    = _config.get("observables",{}).get("missions",True),
@@ -280,9 +281,10 @@ class trovastelle(object):
                         mellyn      = _config.get("observables",{}).get("mellyn",True),
                         messiers    = _config.get("observables",{}).get("messiers",True),
                     )
+                    logging.debug("Fetched {} new observables".format(len(_Observables)))
                     # Very weird, this sometimes does not work. Some race condition?
                     _updated_observables = self.cc.update_observables(_Observables)
-                    print("Updated observables: {}".format(_updated_observables))
+                    logging.debug("Updated observables: {}".format(_updated_observables))
                     # self.cc.observables = _Observables
                     _update_schedule = True
                     self.config["observables"] = _config["observables"]

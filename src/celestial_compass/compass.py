@@ -117,11 +117,14 @@ class CelestialCompass(object):
         self.display_controller.display_calibration_data(self.controller.calibration_status)
         
     def update_observables(self, new_observables):
+        logging.debug("Updating observables in update_observables with {} observables".format(len(new_observables)))
         self.observables = new_observables
+        logging.debug("Done updating observables in update_observables!")
         return True
 
     def update_schedule(self):
         logging.info("Updating schedule")
+        logging.debug("Updating schedule")
         current_time = datetime.datetime.now(datetime.timezone.utc)
         attempts_to_add = 0
         # Clean up the head
@@ -133,6 +136,7 @@ class CelestialCompass(object):
             self.schedule[-1]['end_time']<current_time+datetime.timedelta(seconds=self.target_list_length_s))
         and attempts_to_add<50*(self.target_list_length_s/self.time_on_target_s)):
             attempts_to_add += 1
+            logging.debug("There are {} observables".format(len(self.observables)))
             _observable = random.choices(
                 self.observables,
                 weights = [obs.weight for obs in self.observables],
