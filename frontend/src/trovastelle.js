@@ -1,4 +1,4 @@
-import React, { Component, useRef, useMemo } from 'react';
+import React from 'react';
 
 
 // Bootstrap CSS
@@ -51,7 +51,7 @@ class Trovastelle extends React.Component {
             error: null,
         }
 
-        this.backend_uri = "127.0.0.1:5005"
+        this.backend_uri = "/api/"
     }
     
     updateLocation = (new_location) => {
@@ -62,9 +62,24 @@ class Trovastelle extends React.Component {
         }
       );
     }
+
+    setConfig = (result) => {
+      this.setState({
+        active: true,
+        configuration: result,
+        observables: result.observables,
+        led_pins: result.led_pins,
+        led_color_scheme: result.led_color_scheme,
+        steppers: result.steppers,
+        observables_list: result.observables_list,
+        simulated: result.simulated,
+        refresh_rate_hz: result.refresh_rate_hz,
+        calibration_level: result.calibration_level,
+      });
+    }
     
     fetchData = (myrequest) => {
-      fetch("http://"+this.backend_uri+"/list")
+      fetch(this.backend_uri+"/list")
       .then(res => res.json())
       .then(
         (result) => {
@@ -80,7 +95,7 @@ class Trovastelle extends React.Component {
           });
         }
       );
-      fetch("http://"+this.backend_uri+"/observer")
+      fetch(this.backend_uri+"/observer")
       .then(res => res.json())
       .then(
         (result) => {
@@ -99,22 +114,11 @@ class Trovastelle extends React.Component {
         }
       );
 
-      fetch("http://"+this.backend_uri+"/config")
+      fetch(this.backend_uri+"/config")
       .then(res => res.json())
       .then(
         (result) => {
-          this.setState({
-            active: true,
-            configuration: result,
-            observables: result.observables,
-            led_pins: result.led_pins,
-            led_color_scheme: result.led_color_scheme,
-            steppers: result.steppers,
-            observables_list: result.observables_list,
-            simulated: result.simulated,
-            refresh_rate_hz: result.refresh_rate_hz,
-            calibration_level: result.calibration_level,
-          });
+          this.setConfig(result);
         },
         (error) => {
           this.setState({
@@ -123,7 +127,7 @@ class Trovastelle extends React.Component {
           });
         }
       );
-      fetch("http://"+this.backend_uri+"/calibration")
+      fetch(this.backend_uri+"/calibration")
       .then(res => res.json())
       .then(
         (result) => {
@@ -146,7 +150,7 @@ class Trovastelle extends React.Component {
 
     pushConfig = (myrequest) => {
       fetch(
-        "http://"+this.backend_uri+"/config/",
+        this.backend_uri+"/config/",
         {
           method: 'POST',
           headers: {
@@ -161,7 +165,7 @@ class Trovastelle extends React.Component {
       .then(res => res.json())
       .then(
         (result) => {
-          console.log(result)
+          this.setConfig(result);
         },
         (error) => {
           console.log(error)
@@ -170,12 +174,12 @@ class Trovastelle extends React.Component {
       if (typeof myrequest !== 'undefined'){
         myrequest.preventDefault();
       }
-      this.fetchData();
+      // this.fetchData();
     }
 
     resetList = (myrequest) => {
       fetch(
-        "http://"+this.backend_uri+"/list/",
+        this.backend_uri+"/list/",
         {
           method: 'DELETE',
           headers: {
@@ -187,7 +191,10 @@ class Trovastelle extends React.Component {
       .then(res => res.json())
       .then(
         (result) => {
-          console.log(result)
+          this.setState({
+            active: true,
+            list: result
+          });
         },
         (error) => {
           console.log(error)
@@ -196,7 +203,7 @@ class Trovastelle extends React.Component {
       if (typeof myrequest !== 'undefined'){
         myrequest.preventDefault();
       }
-      this.fetchData();
+      // this.fetchData();
     }
 
     componentDidMount() {
@@ -218,10 +225,10 @@ class Trovastelle extends React.Component {
             <div className="container">
               <span className="navbar-brand mb-0 h1">Trovastelle!</span>
               <form onSubmit={this.fetchData}>
-                <input type="submit" className="btn btn-default navbar-btn" value="Fetch"/>
+                <input type="submit" className="btn btn-info navbar-btn" value="Fetch"/>
               </form>
               <form onSubmit={this.pushConfig}>
-                <input type="submit" className="btn btn-default navbar-btn" value="Upload"/>
+                <input type="submit" className="btn btn-primary navbar-btn" value="Upload"/>
               </form>
             </div>
           </nav>

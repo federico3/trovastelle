@@ -27,9 +27,9 @@
     "steppers":
     {
     	"steps_per_turn_alt": 2052,
-    	"steps_per_turn_az": 533,
-		"alt_direction_up": 2, 
-		"az_direction_cw": 2
+    	"steps_per_turn_az": 1333, 
+	"alt_direction_up": 2, 
+	"az_direction_cw": 2
     },
     "observables_list":
     {
@@ -52,5 +52,5 @@
         "motors": true,
         "display": true
     },
-	"calibration_level": 3
+    "calibration_level": 1
 }

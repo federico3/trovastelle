@@ -25,7 +25,7 @@ const TargetsList = ({targets_list, reset_targets_list}) =>
                 </tbody>
             </table>
             <form onSubmit={reset_targets_list}>
-                <input type="submit" className="btn btn-default" value="Reset"/>
+                <input type="submit" className="btn btn-warning" value="Reset"/>
               </form>
         </div>
     );

@@ -47,11 +47,10 @@
     },
     "simulated":
     {
-        "led": false,
-        "9dof": false,
-        "motors": false,
-        "display": false
+        "led": true,
+        "9dof": true,
+        "motors": true,
+        "display": true
     },
     "calibration_level": 1
 }
-
