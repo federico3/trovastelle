@@ -24,6 +24,7 @@ from luma.oled.device import ssd1306, ssd1309, ssd1325, ssd1331, sh1106, ws0010
 
 import os
 from PIL import ImageFont
+import time
 
 import skyfield
 import logging
@@ -83,7 +84,7 @@ def test_distance_format():
     return
 
 class DisplayController(object):
-    def __init__(self, device=None):
+    def __init__(self, device=None, slow_update: bool=True):
         if device is None:
             serial = i2c(port=1, address=0x3C)
 
@@ -91,6 +92,8 @@ class DisplayController(object):
             self.device = ssd1309(serial)
         else:
             self.device = device
+        
+        self.slow_update = slow_update
         
         self.object_name_width  = self.device.width
         self.object_name_height = round(self.device.height*2/3)
@@ -151,31 +154,55 @@ class DisplayController(object):
         font_size:int=None,
         font_name: str="LiberationSans-Regular.ttf"
     ):
-        if font_size is None:
-            font_size=self._get_text_size_for_box(
-                draw=draw,
-                text=text,
-                width=width,
-                height=height,
-                margin=margin,
-                origin=origin,
-                font_name=font_name,
-            )
-    
-#             font_size = 0
-#         text_width = 0
-#         text_height = 0
-# #         with canvas(self.device) as draw:
-#         while (text_width<(width-margin)) and (text_height<(height-margin)):
-#             font_size += 1
-        font = self.make_font(font_name, font_size)
-        text_width, text_height = draw.textsize(text=text, font=font)
-        draw.text(
-            (origin[0]+round((width-text_width)/2), origin[1]+round((height-text_height)/2)),
-             text=text,
-             font=font,
-             fill="white"
-            )
+        
+        _displayed = False
+        _display_attempts = 0
+        _max_display_attempts = 3
+        # Try to display a few times. 
+        while (not _displayed):
+            try:
+                _display_attempts += 1
+
+                if font_size is None:
+                    font_size=self._get_text_size_for_box(
+                        draw=draw,
+                        text=text,
+                        width=width,
+                        height=height,
+                        margin=margin,
+                        origin=origin,
+                        font_name=font_name,
+                    )
+            
+        #             font_size = 0
+        #         text_width = 0
+        #         text_height = 0
+        # #         with canvas(self.device) as draw:
+        #         while (text_width<(width-margin)) and (text_height<(height-margin)):
+        #             font_size += 1
+                font = self.make_font(font_name, font_size)
+                text_width, text_height = draw.textsize(text=text, font=font)
+                draw.text(
+                    (origin[0]+round((width-text_width)/2), origin[1]+round((height-text_height)/2)),
+                    text=text,
+                    font=font,
+                    fill="white"
+                    )
+                # If we make it here, the display is OK.
+                _displayed = True
+                # Sometimes we get weird errors when sending multiple commands to the display.
+                # In the tradition of async debugging, let's sleep for a bit and see if it helps.
+                if self.slow_update:
+                    time.sleep(1.)
+            except Exception as e:
+                if _display_attempts<_max_display_attempts:
+                    # Try again
+                    _error_string = "Display raised an OSError! This was attempt {}/{}".format(_display_attempts,_max_display_attempts)
+                    logging.error(_error_string)
+                    print(_error_string)
+                    pass
+                else:
+                    raise(e)
     
     def display_fullscreen_text(
         self,

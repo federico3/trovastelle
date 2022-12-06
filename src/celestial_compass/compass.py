@@ -51,6 +51,7 @@ class CelestialCompass(object):
         led_voltage_scale = 1.,
         led_colors: dict = None,
         calibration_level: int = 3,
+        slow_display_update: bool = True,
     ):
         logging.info("Starting application")
         self.running = False
@@ -63,6 +64,7 @@ class CelestialCompass(object):
         self.check_visible = check_visible
         self.visibility_window = visibility_window
         self.calibration_level = calibration_level
+        self.slow_display_update = slow_display_update
         if led_colors is None:
             self.led_colors = {
                 'Mellon': "xkcd:pale",
@@ -95,10 +97,10 @@ class CelestialCompass(object):
             logging.info("Setting up display controller")
             if simulated_display:
                 device = luma.emulator.device.capture()
-                self.display_controller = DisplayController(device=device)
+                self.display_controller = DisplayController(device=device, slow_update=self.slow_display_update)
                 logging.info("Using simulated display in compass")
             else:
-                self.display_controller = DisplayController()
+                self.display_controller = DisplayController(slow_update=self.slow_display_update)
                 logging.info("Using real display in compass")
         else:
             self.display_controller = display_controller

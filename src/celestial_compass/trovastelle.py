@@ -179,6 +179,7 @@ class trovastelle(object):
                 led_voltage_scale = led_voltage_scale,
                 led_colors=color_schema.get(config.get("led_color_scheme","strong"), self.strong_colors_by_type),
                 calibration_level=config.get("calibration_level",3),
+                slow_display_update=config.get("slow_display_update", True),
             )
     def calibrate(self):
         logging.info("Calibrating! Trovastelle")
