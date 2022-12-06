@@ -1,56 +1,49 @@
 {
-	"observables":
-	{
-		"satellites": true,
-		"missions": true,
-		"planets": true,
-		"smallbodies": true,
-		"mellyn": true,
-		"messiers": true
-	},
-	"observer":
-	{
-		"lat_deg_N": 34.1376481,
-		"lon_deg_E": -118.138686,
-		"alt_m": 204
-	},
-	"led_pins":
-	{
-		"red": 5,
-		"green": 6,
-		"blue": 13,
-		"alpha": 19,
-		"anode_high": false,
-		"voltage_scale": 1.0
-	},
-	"led_color_scheme": "strong",
-    "steppers":
-    {
-    	"steps_per_turn_alt": 2052,
-    	"steps_per_turn_az": 533,
-		"alt_direction_up": 2, 
-		"az_direction_cw": 2
+  "observables": {
+    "satellites": true,
+    "missions": true,
+    "planets": true,
+    "smallbodies": true,
+    "mellyn": true,
+    "messiers": true
+  },
+  "observer": {
+    "lat_deg_N": 34.1376481,
+    "lon_deg_E": -118.13868599999999,
+    "alt_m": 204
+  },
+  "led_pins": {
+    "red": 5,
+    "green": 6,
+    "blue": 13,
+    "alpha": 19,
+    "anode_high": false,
+    "voltage_scale": 1.0
+  },
+  "led_color_scheme": "strong",
+  "steppers": {
+    "steps_per_turn_alt": 2052,
+    "steps_per_turn_az": 1333,
+    "alt_direction_up": 2,
+    "az_direction_cw": 2
+  },
+  "observables_list": {
+    "time_on_target_s": 180,
+    "target_list_length_s": 600,
+    "check_visible": true,
+    "visibility_window": {
+      "min_alt_rad": -1.57,
+      "max_alt_rad": 1.57,
+      "min_az_rad": 0,
+      "max_az_rad": 6.28
     },
-    "observables_list":
-    {
-    	"time_on_target_s": 150,
-    	"target_list_length_s": 600,
-    	"check_visible": true,
-    	"visibility_window":
-    	{
-	    	"min_alt_rad": -1.57,
-	    	"max_alt_rad": 1.57,
-	    	"min_az_rad": 0.0,
-	    	"max_az_rad": 6.28
-    	},
-    	"refresh_rate_hz": 1.0
-    },
-    "simulated":
-    {
-        "led": true,
-        "9dof": true,
-        "motors": true,
-        "display": true
-    },
-    "calibration_level": 3
+    "refresh_rate_hz": 1
+  },
+  "simulated": {
+    "led": true,
+    "9dof": true,
+    "motors": true,
+    "display": true
+  },
+  "calibration_level": 1
 }

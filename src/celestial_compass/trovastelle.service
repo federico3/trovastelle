@@ -3,8 +3,8 @@ Description=Trovastelle service
 
 [Service]
 User=pi
-WorkingDirectory=/home/pi/sky-finder/src/celestial_compass/
-ExecStart=/home/pi/sky-finder/src/celestial_compass/trovastelle.sh
+WorkingDirectory=/home/pi/trovastelle/src/celestial_compass/
+ExecStart=/home/pi/trovastelle/src/celestial_compass/trovastelle.sh
 
 [Install]
 WantedBy=multi-user.target

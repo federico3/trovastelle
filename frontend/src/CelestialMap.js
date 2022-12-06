@@ -1,4 +1,4 @@
-import React, { Component } from "react";
+import React from "react";
 
 import d3 from "d3-celestial/lib/d3";
 
@@ -55,8 +55,8 @@ class MyCelestialMap extends React.Component {
         container: "celestial-map",   // ID of parent element, e.g. div, null = html-body
         datapath: "https://ofrohn.github.io/data/",  // Path/URL to data files, empty = subfolder 'data'
         stars: {
-          show: false,    // Show stars
-          limit: 2,      // Show only stars brighter than limit magnitude
+          show: true,    // Show stars
+          limit: 4,      // Show only stars brighter than limit magnitude
           colors: true,  // Show stars in spectral colors, if not use default color
           style: { fill: "#ffffff", opacity: 1 }, // Default style for stars
           designation: true, // Show star names (Bayer, Flamsteed, Variable star, Gliese or designation, 
@@ -139,7 +139,7 @@ class MyCelestialMap extends React.Component {
                    align: "center", baseline: "middle" },
           symbolType: "symbol",  // Type of planet symbol: 'symbol' graphic planet sign, 'disk' filled circle scaled by magnitude
                                  // 'letter': 1 or 2 letters S Me V L Ma J S U N     
-          names: false,          // Show name in nameType language next to symbol
+          names: true,          // Show name in nameType language next to symbol
           nameStyle: { fill: "#00ccff", font: "14px 'Lucida Sans Unicode', Consolas, sans-serif", align: "right", baseline: "top" },
           namesType: "desig"     // Language of planet name (see list below of language codes available for planets), 
                                  // or desig = 3-letter designation
@@ -151,17 +151,17 @@ class MyCelestialMap extends React.Component {
                        font: ["14px Helvetica, Arial, sans-serif",  // Style for constellations
                               "12px Helvetica, Arial, sans-serif",  // Different fonts for diff.
                               "11px Helvetica, Arial, sans-serif"]},// ranked constellations
-          lines: false,   // Show constellation lines, style below
-          lineStyle: { stroke: "#cccccc", width: 1, opacity: 0.6 }, 
+          lines: true,   // Show constellation lines, style below
+          lineStyle: { stroke: "#cccccc", width: 1, opacity: 0.5 }, 
           bounds: false, // Show constellation boundaries, style below
           boundStyle: { stroke: "#cccc00", width: 0.5, opacity: 0.8, dash: [2, 4] }
         },  
         mw: {
           show: false,     // Show Milky Way as filled multi-polygon outlines 
-          style: { fill: "#ffffff", opacity: 0.15 }  // Style for MW layers
+          style: { fill: "#ffffff", opacity: 0.08 }  // Style for MW layers
         },
         lines: {  // Display & styles for graticule & some planes
-          graticule: { show: true, stroke: "#cccccc", width: 0.6, opacity: 0.8,   
+          graticule: { show: false, stroke: "#cccccc", width: 0.6, opacity: 0.8,   
             // grid values: "outline", "center", or [lat,...] specific position
             lon: {pos: [""], fill: "#eee", font: "10px Helvetica, Arial, sans-serif"}, 
             // grid values: "outline", "center", or [lon,...] specific position
@@ -262,8 +262,6 @@ class MyCelestialMap extends React.Component {
     // Add observables
     var observables_list = this.props.list;
 
-    var vis_window = this.props.visibility_window;
-
     Celestial.add({
       type:"line",
       // file:"http://"+this.state.backend_uri+"/list/",
@@ -271,7 +269,6 @@ class MyCelestialMap extends React.Component {
       callback: function(error, json) {
         if (error) return console.warn(error);
         // Load the geoJSON file and transform to correct coordinate system, if necessary 
-        // var dsos = Celestial.getData(json);
         // Add to celestiasl objects container in d3
         // First, wipe the old objects.
         Celestial.container.selectAll(".observable").remove();
@@ -287,7 +284,7 @@ class MyCelestialMap extends React.Component {
       redraw: function() {
         var m = Celestial.metrics(), // Get the current map size in pixels
             // empty quadtree, will be used for proximity check
-            quadtree = d3.geom.quadtree().extent([[-1, -1], [m.width + 1, m. height + 1]])([]);
+            quadtree = d3.geom.quadtree().extent([[-1, -1], [m.width + 1, m.height + 1]])([]);
     
         // Select the added objects by class name as given previously
         Celestial.container.selectAll(".observable").each(function(d) {
@@ -336,6 +333,7 @@ class MyCelestialMap extends React.Component {
     }
 
     // Add visibility window
+    // var vis_window = this.props.visibility_window;
     // if (this.props.show_visibility_window){
     if (false){
       var visibility_window_geojson = {
@@ -376,7 +374,6 @@ class MyCelestialMap extends React.Component {
           Celestial.container.selectAll(".visibility_windows").remove();
           Celestial.container.selectAll("visibility_window").remove();
           Celestial.container.selectAll(".visibility_window").remove();
-          console.log("Removes viswindow");
           Celestial.container.selectAll(".visibility_windows")
             .data(visibility_window_Celestial.features)
             .enter().append("path")
