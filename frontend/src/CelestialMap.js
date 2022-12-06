@@ -55,7 +55,7 @@ class MyCelestialMap extends React.Component {
         container: "celestial-map",   // ID of parent element, e.g. div, null = html-body
         datapath: "https://ofrohn.github.io/data/",  // Path/URL to data files, empty = subfolder 'data'
         stars: {
-          show: false,    // Show stars
+          show: true,    // Show stars
           limit: 4,      // Show only stars brighter than limit magnitude
           colors: true,  // Show stars in spectral colors, if not use default color
           style: { fill: "#ffffff", opacity: 1 }, // Default style for stars
@@ -151,17 +151,17 @@ class MyCelestialMap extends React.Component {
                        font: ["14px Helvetica, Arial, sans-serif",  // Style for constellations
                               "12px Helvetica, Arial, sans-serif",  // Different fonts for diff.
                               "11px Helvetica, Arial, sans-serif"]},// ranked constellations
-          lines: false,   // Show constellation lines, style below
-          lineStyle: { stroke: "#cccccc", width: 1, opacity: 0.6 }, 
+          lines: true,   // Show constellation lines, style below
+          lineStyle: { stroke: "#cccccc", width: 1, opacity: 0.5 }, 
           bounds: false, // Show constellation boundaries, style below
           boundStyle: { stroke: "#cccc00", width: 0.5, opacity: 0.8, dash: [2, 4] }
         },  
         mw: {
           show: false,     // Show Milky Way as filled multi-polygon outlines 
-          style: { fill: "#ffffff", opacity: 0.15 }  // Style for MW layers
+          style: { fill: "#ffffff", opacity: 0.08 }  // Style for MW layers
         },
         lines: {  // Display & styles for graticule & some planes
-          graticule: { show: true, stroke: "#cccccc", width: 0.6, opacity: 0.8,   
+          graticule: { show: false, stroke: "#cccccc", width: 0.6, opacity: 0.8,   
             // grid values: "outline", "center", or [lat,...] specific position
             lon: {pos: [""], fill: "#eee", font: "10px Helvetica, Arial, sans-serif"}, 
             // grid values: "outline", "center", or [lon,...] specific position

@@ -41,3 +41,36 @@ datalist {
 .main {
   margin-top: 30px; /* Add a top margin to avoid content overlay */
 }
+
+.top-alert {
+  margin-top: 60px; /* Add a top margin to avoid content overlay */
+}
+
+.skymap {
+  margin-top: 10px; /* Add a top margin to avoid content overlay */
+}
+
+.targetlist {
+  margin-top: 40px; /* Add a top margin to avoid content overlay */
+}
+
+thead th {
+  font-weight: bold;
+}
+
+tbody th {
+  font-weight:normal;
+}
+
+table {
+  border-collapse: collapse;
+  width: 100%;
+}
+tbody th {
+  border-right: solid 1px black; 
+  border-left: solid 1px black;
+}
+thead th {background-color: white; border-bottom: solid 1px; text-align: center;}
+tr:nth-child(even) {background-color: white;}
+tr:nth-child(odd) {background-color: #f2f2f2;}
+tr:last-child {border-bottom: solid 1px;}

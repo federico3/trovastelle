@@ -19,6 +19,7 @@ import RefreshRateWidget from './RefreshRate';
 import ObservablesPropsWidget from './ObservablesProps';
 import HardwareWidget from './hardware';
 import { TargetsList } from './TargetsList';
+import AlertWidget from './AlertState';
 
 class Trovastelle extends React.Component {
     constructor(props) {
@@ -48,10 +49,19 @@ class Trovastelle extends React.Component {
             simulated: {"led": true, "ndof": true, "motors": true, "display": true},
             refresh_rate_hz: 1.0,
             calibration_level: 3,
+            backend_state: "Waiting",
+            backend_message: "",
             error: null,
         }
 
-        this.backend_uri = "/api/"
+        if (process.env.NODE_ENV === "production") {
+          this.backend_uri = "/api";
+        } else {
+          this.backend_uri = "http://127.0.0.1:5005";
+        }
+        // console.log(process.env.NODE_ENV);
+        // console.log(this.backend_uri);
+        
     }
     
     updateLocation = (new_location) => {
@@ -79,6 +89,11 @@ class Trovastelle extends React.Component {
     }
     
     fetchData = (myrequest) => {
+      this.setState({
+        backend_state: "Waiting",
+        backend_message: "Fetching data",
+      });
+
       fetch(this.backend_uri+"/list")
       .then(res => res.json())
       .then(
@@ -143,12 +158,28 @@ class Trovastelle extends React.Component {
           });
         }
       );
+      if (this.error != null){
+        this.setState({
+          backend_state: "Error",
+          backend_message: "Error fetching data",
+        });
+      } else {
+        this.setState({
+          backend_state: "OK",
+          backend_message: "Data loaded!",
+        });
+      }
       if (typeof myrequest !== 'undefined'){
         myrequest.preventDefault();
       }
     }
 
     pushConfig = (myrequest) => {
+      this.setState({
+        backend_state: "Waiting",
+        backend_message: "Pushing new configuration...",
+      });
+
       fetch(
         this.backend_uri+"/config/",
         {
@@ -166,18 +197,30 @@ class Trovastelle extends React.Component {
       .then(
         (result) => {
           this.setConfig(result);
+          this.setState({
+            backend_state: "OK",
+            backend_message: "New configuration pushed!",
+          });
         },
         (error) => {
-          console.log(error)
+          console.log(error);
+          this.setState({
+            backend_state: "Error",
+            backend_message: "Error pushing new configuration!",
+          });
         }
       );
       if (typeof myrequest !== 'undefined'){
         myrequest.preventDefault();
       }
-      // this.fetchData();
+      this.fetchData();
     }
 
     resetList = (myrequest) => {
+      this.setState({
+        backend_state: "Waiting",
+        backend_message: "Loading new observables...",
+      });
       fetch(
         this.backend_uri+"/list/",
         {
@@ -195,9 +238,17 @@ class Trovastelle extends React.Component {
             active: true,
             list: result
           });
+          this.setState({
+            backend_state: "OK",
+            backend_message: "Loaded new list!",
+          });
         },
         (error) => {
-          console.log(error)
+          console.log(error);
+          this.setState({
+            backend_state: "Error",
+            backend_message: "Error pushing new configuration!",
+          });
         }
       );
       if (typeof myrequest !== 'undefined'){
@@ -253,8 +304,12 @@ class Trovastelle extends React.Component {
                 </ul>
             </div>
           </nav> */}
-           
-          <div>
+          <AlertWidget 
+           status={this.state.backend_state}
+           message={this.state.backend_message}
+           error={this.state.error}
+          />
+          <div className='skymap'>
             <h2> Sky Map </h2>
             <MyCelestialMap
               backend_uri={this.backend_uri}
@@ -264,7 +319,7 @@ class Trovastelle extends React.Component {
               show_visibility_window={this.state.observables_list["check_visible"]}
             />
           </div>
-          <div>
+          <div className='targetlist'>
             <h2> Targets </h2>
             <TargetsList
               targets_list={this.state.list}
