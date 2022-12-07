@@ -9,11 +9,6 @@ const Celestial = celestial.Celestial();
 class MyCelestialMap extends React.Component {
   constructor(props) {
       super(props);
-      this.state = {
-        // list: props.list,
-        backend_uri: props.backend_uri,
-        // observer: props.observer
-      }
 
       this.celestial_config = { 
         width: 0,           // Default width, 0 = full parent element width; 
@@ -53,7 +48,7 @@ class MyCelestialMap extends React.Component {
                             // Default: desig or empty string for designations, other languages as used anywhere else
         culture: "",        // Source of constellations and star names, default "iau", other: "cn" Traditional Chinese
         container: "celestial-map",   // ID of parent element, e.g. div, null = html-body
-        datapath: "https://ofrohn.github.io/data/",  // Path/URL to data files, empty = subfolder 'data'
+        datapath: "d3-celestial-data/",  // Path/URL to data files, empty = subfolder 'data'
         stars: {
           show: true,    // Show stars
           limit: 4,      // Show only stars brighter than limit magnitude
@@ -185,13 +180,13 @@ class MyCelestialMap extends React.Component {
           opacity: 0.5
         },  
         daylight: {  //Show day sky as a gradient, if location is set and map projection is hemispheric
-          show: true
+          show: false
         }
       };
 
   }
 
-  updateMap() {
+  updateMap(first_time) {
 
     // Celestial.date(Date());
 
@@ -261,7 +256,7 @@ class MyCelestialMap extends React.Component {
 
     // Add observables
     var observables_list = this.props.list;
-
+    
     Celestial.add({
       type:"line",
       // file:"http://"+this.state.backend_uri+"/list/",
@@ -411,17 +406,22 @@ class MyCelestialMap extends React.Component {
       // Celestial.container.selectAll(".visibility_window").remove();
     };
 
+    // if (first_time) {
     Celestial.display(this.celestial_config);
+    // } else {
+      // Celestial.apply(this.celestial_config);
+      // Celestial.redraw();
+    // }
     Celestial.location([this.props.observer.lat_deg_N,this.props.observer.lon_deg_E]);
 
   }
 
   componentDidMount() {
-    this.updateMap();
+    this.updateMap(true);
   }
 
   componentDidUpdate() {
-    this.updateMap();
+    this.updateMap(false);
   }
 
   render() {
