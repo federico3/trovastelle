@@ -115,10 +115,10 @@ class trovastelle(object):
         if simulated_display:
             import luma.emulator.device
             device = luma.emulator.device.capture()
-            display_controller = DisplayController(device=device)
+            display_controller = DisplayController(device=device, slow_display_update=config.get("slow_display_update", True))
             logging.info("Using simulated display in trovastelle")
         else:
-            display_controller = DisplayController()
+            display_controller = DisplayController(slow_display_update=config.get("slow_display_update", True))
             logging.info("Using real display in trovastelle")
         display_controller.display_fullscreen_text("Trovastelle")
 
@@ -181,6 +181,8 @@ class trovastelle(object):
                 calibration_level=config.get("calibration_level",3),
                 slow_display_update=config.get("slow_display_update", True),
             )
+
+
     def calibrate(self):
         logging.info("Calibrating! Trovastelle")
     
@@ -328,15 +330,23 @@ class trovastelle(object):
 
                 if "led_pins" in  _config.keys() and _config["led_pins"] != self.config["led_pins"]:
                     logging.info("New LED pins")
+                    self.config["led_pins"] = _config["led_pins"]
                     _restart = True
 
                 if "steppers" in  _config.keys() and _config["steppers"] != self.config["steppers"]:
                     logging.info("New stepper properties")
+                    self.config["steppers"] = _config["steppers"]
                     _restart = True
 
                 if "simulated" in  _config.keys() and _config["simulated"] != self.config["simulated"]:
                     logging.info("New simulation properties")
+                    self.config["simulated"] = _config["simulated"]
                     _restart = True
+
+                if "slow_display_update" in  _config.keys() and _config["slow_display_update"] != self.config["slow_display_update"]:
+                    logging.info("New slow display update configuration: {}".format(_config["slow_display_update"]))
+                    self.cc.display_controller.slow_display_update = _config["slow_display_update"]
+                    self.config["slow_display_update"] = _config["slow_display_update"]
                 
                 # self.config = _config # We do this piecemeal
                 # Store configuration on disk!

@@ -49,6 +49,7 @@ class Trovastelle extends React.Component {
             simulated: {"led": true, "ndof": true, "motors": true, "display": true},
             refresh_rate_hz: 1.0,
             calibration_level: 3,
+            slow_display_update: true,
             backend_state: "Waiting",
             backend_message: "",
             error: null,
@@ -85,6 +86,7 @@ class Trovastelle extends React.Component {
         simulated: result.simulated,
         refresh_rate_hz: result.refresh_rate_hz,
         calibration_level: result.calibration_level,
+        slow_display_update: result.slow_display_update,
       });
     }
     
@@ -464,6 +466,7 @@ class Trovastelle extends React.Component {
                   steppers: this.state.steppers,
                   led_color_scheme: this.state.led_color_scheme,
                   led_pins: this.state.led_pins,
+                  slow_display_update: this.state.slow_display_update,
                 }}
                 updateHardwareSettings={{
                   steppers: {
@@ -480,7 +483,8 @@ class Trovastelle extends React.Component {
                     blue: ((r)=> {var olState = this.state.led_pins; olState.blue =   parseInt(r.target.value);   this.setState({led_pins: olState}); return 0}),
                     anode_high:()=> {var sState = this.state.led_pins; sState.anode_high=!sState.anode_high; this.setState({steppers: sState}); return 0},
                     voltage_scale: ((r)=> {var olState = this.state.led_pins; olState.voltage_scale =   parseFloat(r.target.value);   this.setState({led_pins: olState}); return 0}),
-                  }
+                  },
+                  slow_display_update: ()=>{this.setState({slow_display_update: !this.state.slow_display_update}); return 0},
                 }}
               />
             </div>

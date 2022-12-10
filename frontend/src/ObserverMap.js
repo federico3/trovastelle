@@ -188,7 +188,7 @@ class ObserverMap extends React.Component{
     const observer = [this.props.observer.lat_deg_N, this.props.observer.lon_deg_E];
 
     return(
-      <div>
+      <div className="observer-map">
       <div> Click on the map to set the observer's location.
         <button onClick={this.geolocate}>📍 Find my position.</button>
         <span id="geolocationStatus">{this.geolocationStatusSpan()}</span>

@@ -84,7 +84,7 @@ def test_distance_format():
     return
 
 class DisplayController(object):
-    def __init__(self, device=None, slow_update: bool=True):
+    def __init__(self, device=None, slow_display_update: bool=True):
         if device is None:
             serial = i2c(port=1, address=0x3C)
 
@@ -93,7 +93,8 @@ class DisplayController(object):
         else:
             self.device = device
         
-        self.slow_update = slow_update
+        self.slow_display_update = slow_display_update
+        print("Slow display update prop is {}".format(self.slow_display_update))
         
         self.object_name_width  = self.device.width
         self.object_name_height = round(self.device.height*2/3)
@@ -192,7 +193,7 @@ class DisplayController(object):
                 _displayed = True
                 # Sometimes we get weird errors when sending multiple commands to the display.
                 # In the tradition of async debugging, let's sleep for a bit and see if it helps.
-                if self.slow_update:
+                if self.slow_display_update:
                     time.sleep(1.)
             except Exception as e:
                 if _display_attempts<_max_display_attempts:
