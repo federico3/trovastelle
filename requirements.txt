@@ -23,4 +23,6 @@ zmq
 flask
 flask-cors
 geojson
+git+https://github.com/openskynetwork/opensky-api.git#subdirectory=python
+geopy
 # Needs sudo apt-get install libgeos-dev
