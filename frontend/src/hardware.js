@@ -1,4 +1,4 @@
-import React, { Component } from "react";
+import React from "react";
 
 const HardwareWidget = ({hardwareSettings, updateHardwareSettings}) => 
 {
@@ -25,7 +25,7 @@ const HardwareWidget = ({hardwareSettings, updateHardwareSettings}) =>
                     <label htmlFor="stepper_az_direction_cw"> Azimuth stepper forward motion drives the arrow clockwise</label>
                 </div>
 
-                <h4> LEDs </h4>
+            <h4> LEDs </h4>
                 <div>
                     <input type="checkbox" id="led_color_scheme" checked={hardwareSettings.led_color_scheme === "strong"} onChange={updateHardwareSettings.led_color_scheme} name="led_color_scheme_strong" value="led_color_scheme_strong"/>
                     <label htmlFor="led_color_scheme"> Vibrant LED colors on power LED </label>
@@ -55,6 +55,11 @@ const HardwareWidget = ({hardwareSettings, updateHardwareSettings}) =>
                     <label htmlFor="led_voltage_scale">LED voltage scale factor</label>
                     <input type="number" step="1" label="led_voltage_scale" value={hardwareSettings.led_pins.voltage_scale} onInput={updateHardwareSettings.led_pins.voltage_scale}/>
                 </div>
+            <h4> Display </h4>
+            <div>
+                <input type="checkbox" id="slow_display_update" checked={hardwareSettings.slow_display_update} onChange={updateHardwareSettings.slow_display_update} name="slow_display_update" value="slow_display_update"/>
+                <label htmlFor="slow_display_update"> Slow down display update (for finicky i2c bus) </label>
+            </div>
         </div>
     );
 };

@@ -19,6 +19,7 @@ datalist {
   position: fixed; /* Set the navbar to fixed position */
   top: 0; /* Position the navbar at the top of the page */
   width: 100%; /* Full width */
+  z-index:9999; 
 }
 
 /* Links inside the navbar */
@@ -44,10 +45,16 @@ datalist {
 
 .top-alert {
   margin-top: 60px; /* Add a top margin to avoid content overlay */
+  position:fixed; 
+  top: 0px; 
+  left: 0px; 
+  width: 100%;
+  z-index:9999; 
+  border-radius:0px
 }
 
 .skymap {
-  margin-top: 10px; /* Add a top margin to avoid content overlay */
+  margin-top: 120px; /* Add a top margin to avoid content overlay */
 }
 
 .targetlist {

@@ -45,10 +45,11 @@ class Trovastelle extends React.Component {
                 "max_az_rad": 6.28
               },
             },
-            list: {"features": []},
+            list: {"type": "FeatureCollection", "features": []},
             simulated: {"led": true, "ndof": true, "motors": true, "display": true},
             refresh_rate_hz: 1.0,
             calibration_level: 3,
+            slow_display_update: true,
             backend_state: "Waiting",
             backend_message: "",
             error: null,
@@ -85,47 +86,90 @@ class Trovastelle extends React.Component {
         simulated: result.simulated,
         refresh_rate_hz: result.refresh_rate_hz,
         calibration_level: result.calibration_level,
+        slow_display_update: result.slow_display_update,
       });
     }
     
     fetchData = (myrequest) => {
       this.setState({
         backend_state: "Waiting",
-        backend_message: "Fetching data",
+        backend_message: "Fetching data...",
       });
+
+      let list_fetched = 0;
+      let observer_fetched = 0;
+      let config_fetched = 0;
+      let calibration_fetched = 0;
+
+      let fetch_state = (list_fetched, observer_fetched, config_fetched, calibration_fetched) => {
+        let _state = "Processing";
+        if (list_fetched === 1 & observer_fetched === 1 & config_fetched === 1 & calibration_fetched === 1){
+          _state = "OK";
+        } else if (list_fetched === -1 | observer_fetched === -1 | config_fetched === -1 | calibration_fetched === -1) {
+          _state = "Error";
+        }
+        let _msg = "Data: ";
+        _msg += (list_fetched === 1? "✔️": (list_fetched === -1? "❌": "⌛")) + " list, ";
+        _msg += (observer_fetched === 1? "✔️": (observer_fetched === -1? "❌": "⌛")) + " observer, ";
+        _msg += (config_fetched === 1? "✔️": (config_fetched === -1? "❌": "⌛")) + " configuration, ";
+        _msg += (calibration_fetched === 1? "✔️": (calibration_fetched === -1? "❌": "⌛")) + " calibration.";
+        return [_msg, _state];
+      }
+
 
       fetch(this.backend_uri+"/list")
       .then(res => res.json())
       .then(
         (result) => {
+          list_fetched = 1;
+          let [_notification_message, _notification_state] = fetch_state(list_fetched, observer_fetched, config_fetched, calibration_fetched);
           this.setState({
             active: true,
-            list: result
+            list: result,
+            backend_state: _notification_state,
+            backend_message: _notification_message,
           });
+          console.log("Fetched list!");
+          console.log(this.state.list);
         },
         (error) => {
+          list_fetched = -1;
+          console.log("Failed to fetch list!");
+          console.log(this.state.list);
+          let [_notification_message, _notification_state] = fetch_state(list_fetched, observer_fetched, config_fetched, calibration_fetched);
           this.setState({
             active: true,
-            error: error
+            backend_state: _notification_state,
+            backend_message: _notification_message,
           });
         }
       );
+
       fetch(this.backend_uri+"/observer")
       .then(res => res.json())
       .then(
         (result) => {
+          observer_fetched = 1;
+          let [_notification_message, _notification_state] = fetch_state(list_fetched, observer_fetched, config_fetched, calibration_fetched);
           this.setState({
             observer: {
               lat_deg_N: result.lat_deg_N,
               lon_deg_E: result.lon_deg_E,
               alt_m: result.alt_m,
-            }
+            },
+            backend_state: _notification_state,
+            backend_message: _notification_message,
           });
+
         },
         (error) => {
+          observer_fetched = -1;
+          let [_notification_message, _notification_state] = fetch_state(list_fetched, observer_fetched, config_fetched, calibration_fetched);
           this.setState({
-            error: error
+            backend_state: _notification_state,
+            backend_message: _notification_message,
           });
+
         }
       );
 
@@ -133,42 +177,50 @@ class Trovastelle extends React.Component {
       .then(res => res.json())
       .then(
         (result) => {
+          config_fetched = 1;
+          let [_notification_message, _notification_state] = fetch_state(list_fetched, observer_fetched, config_fetched, calibration_fetched);
           this.setConfig(result);
+          this.setState({
+            backend_state: _notification_state,
+            backend_message: _notification_message,
+          });
         },
         (error) => {
+          config_fetched = -1;
+          let [_notification_message, _notification_state] = fetch_state(list_fetched, observer_fetched, config_fetched, calibration_fetched);
           this.setState({
             active: true,
-            error: error
+            backend_state: _notification_state,
+            backend_message: _notification_message,
           });
+
         }
       );
       fetch(this.backend_uri+"/calibration")
       .then(res => res.json())
       .then(
         (result) => {
+          calibration_fetched = 1;
+          let [_notification_message, _notification_state] = fetch_state(list_fetched, observer_fetched, config_fetched, calibration_fetched);
           this.setState({
             active: true,
-            calibration: result
+            calibration: result,
+            backend_state: _notification_state,
+            backend_message: _notification_message,
           });
+
         },
         (error) => {
+          calibration_fetched = -1;
+          let [_notification_message, _notification_state] = fetch_state(list_fetched, observer_fetched, config_fetched, calibration_fetched);
           this.setState({
             active: true,
-            error: error
+            backend_state: _notification_state,
+            backend_message: _notification_message,
           });
         }
       );
-      if (this.error != null){
-        this.setState({
-          backend_state: "Error",
-          backend_message: "Error fetching data",
-        });
-      } else {
-        this.setState({
-          backend_state: "OK",
-          backend_message: "Data loaded!",
-        });
-      }
+
       if (typeof myrequest !== 'undefined'){
         myrequest.preventDefault();
       }
@@ -201,6 +253,7 @@ class Trovastelle extends React.Component {
             backend_state: "OK",
             backend_message: "New configuration pushed!",
           });
+          this.fetchData();
         },
         (error) => {
           console.log(error);
@@ -208,18 +261,19 @@ class Trovastelle extends React.Component {
             backend_state: "Error",
             backend_message: "Error pushing new configuration!",
           });
+          this.fetchData();
         }
       );
       if (typeof myrequest !== 'undefined'){
         myrequest.preventDefault();
       }
-      this.fetchData();
+      
     }
 
     resetList = (myrequest) => {
       this.setState({
         backend_state: "Waiting",
-        backend_message: "Loading new observables...",
+        backend_message: "Updating observables list...",
       });
       fetch(
         this.backend_uri+"/list/",
@@ -247,7 +301,7 @@ class Trovastelle extends React.Component {
           console.log(error);
           this.setState({
             backend_state: "Error",
-            backend_message: "Error pushing new configuration!",
+            backend_message: "Error updating observables list!",
           });
         }
       );
@@ -412,6 +466,7 @@ class Trovastelle extends React.Component {
                   steppers: this.state.steppers,
                   led_color_scheme: this.state.led_color_scheme,
                   led_pins: this.state.led_pins,
+                  slow_display_update: this.state.slow_display_update,
                 }}
                 updateHardwareSettings={{
                   steppers: {
@@ -428,7 +483,8 @@ class Trovastelle extends React.Component {
                     blue: ((r)=> {var olState = this.state.led_pins; olState.blue =   parseInt(r.target.value);   this.setState({led_pins: olState}); return 0}),
                     anode_high:()=> {var sState = this.state.led_pins; sState.anode_high=!sState.anode_high; this.setState({steppers: sState}); return 0},
                     voltage_scale: ((r)=> {var olState = this.state.led_pins; olState.voltage_scale =   parseFloat(r.target.value);   this.setState({led_pins: olState}); return 0}),
-                  }
+                  },
+                  slow_display_update: ()=>{this.setState({slow_display_update: !this.state.slow_display_update}); return 0},
                 }}
               />
             </div>
