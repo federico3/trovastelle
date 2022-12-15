@@ -4,6 +4,8 @@ Description=Trovastelle service
 [Service]
 User=pi
 WorkingDirectory=/home/pi/trovastelle/src/celestial_compass/
+Restart=on-failure
+RestartSec=10s
 ExecStart=/home/pi/trovastelle/src/celestial_compass/trovastelle.sh
 
 [Install]
