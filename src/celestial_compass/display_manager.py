@@ -177,16 +177,12 @@ class DisplayController(object):
         font_size:int=None,
         font_name: str="LiberationSans-Regular.ttf"
     ):
-        print("Trying to display text") 
         _displayed = False
         _display_attempts = 0
         # Try to display a few times. 
         while (not _displayed):
-            print("Abount to enter try catch block")
             try:
-                print("Hi from inside")
                 _display_attempts += 1
-                print("  About to get text size")
                 if font_size is None:
                     font_size=self._get_text_size_for_box(
                         draw=draw,
@@ -204,18 +200,14 @@ class DisplayController(object):
         # #         with canvas(self.device) as draw:
         #         while (text_width<(width-margin)) and (text_height<(height-margin)):
         #             font_size += 1
-                print("   Making font")
                 font = self.make_font(font_name, font_size)
-                print("   Getting text size")
                 text_width, text_height = draw.textsize(text=text, font=font)
-                print("   drawing!")
                 draw.text(
                     (origin[0]+round((width-text_width)/2), origin[1]+round((height-text_height)/2)),
                     text=text,
                     font=font,
                     fill="white"
                     )
-                print("We should be OK")
                 # If we make it here, the display is OK.
                 _displayed = True
                 # Sometimes we get weird errors when sending multiple commands to the display.
@@ -223,19 +215,15 @@ class DisplayController(object):
                 if self.slow_display_update:
                     time.sleep(1.)
             except OSError as e:
-                print("ERROR: encountered a OSError")
                 logging.error("Encountered a OSError! Error {}".format(e.errno))
                 if ((e.errno != errno.EREMOTEIO) and (e.errno != errno.EIO)):
-                    print("Not one of my errors, reraising")
-                    time.sleep(2.)
+                    time.sleep(1.)
                     raise(e)
                 if _display_attempts<MAX_DISPLAY_ATTEMPTS:
                     # Try again
                     _error_string = "Display raised an OSError! This was attempt {}/{}".format(_display_attempts,MAX_DISPLAY_ATTEMPTS)
                     logging.error(_error_string)
-                    print(_error_string)
                     time.sleep(1.)
-                    pass
                 else:
                     raise(e)
     
@@ -361,6 +349,7 @@ class DisplayController(object):
         _display_attempts = 0
         while _displayed is False and _display_attempts<MAX_DISPLAY_ATTEMPTS:
             try:
+                _display_attempts += 1
                 with canvas(self.device) as draw:
                     calibration_title_width  = self.device.width
                     calibration_title_height = round(self.device.height/3)
