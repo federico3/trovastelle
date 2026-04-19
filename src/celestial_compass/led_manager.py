@@ -75,8 +75,9 @@ class RGBManager(object):
             self.RGB_PWM[color].start(0)
             
     def __del__(self):
-        for color, pin in self.RGB_pins.items():
+        for color in self.RGB_PWM.keys():
             self.RGB_PWM[color].stop()
+            # If we crash early in setup we will end up here before things are initialized
         GPIO.cleanup()
             
     def display_color(self, RGB_color: list=[1.,1.,1.]):

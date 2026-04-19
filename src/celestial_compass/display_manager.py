@@ -23,11 +23,14 @@ from luma.core.render import canvas
 from luma.oled.device import ssd1306, ssd1309, ssd1325, ssd1331, sh1106, ws0010
 
 import os
+import errno
 from PIL import ImageFont
 import time
 
 import skyfield
 import logging
+
+MAX_DISPLAY_ATTEMPTS = 5
 
 def round_number_to_fixed_width(number, width):
     int_length = len(str(round(number)))
@@ -117,12 +120,31 @@ class DisplayController(object):
         
         font = self.make_font(font_name, font_size)
         
-        with canvas(self.device) as draw:
-            draw.rectangle(self.device.bounding_box, outline="white", fill="black")
-            w, h = draw.textsize(text=text, font=font)
-            left = (self.device.width - w) / 2
-            top = (self.device.height - h) / 2 
-            draw.text((left, top), text=text, font=font, fill="white")
+        _displayed = False
+        _display_attempts = 0
+
+        while _displayed is False and _display_attempts<MAX_DISPLAY_ATTEMPTS:
+            try:
+                _display_attempts += 1
+                with canvas(self.device) as draw:
+                    draw.rectangle(self.device.bounding_box, outline="white", fill="black")
+                    w, h = draw.textsize(text=text, font=font)
+                    left = (self.device.width - w) / 2
+                    top = (self.device.height - h) / 2 
+                    draw.text((left, top), text=text, font=font, fill="white")
+                    _displayed = True
+            except OSError as e:
+                if ((e.errno != errno.EREMOTEIO) and (e.errno != errno.EIO)):
+                    # Not one of our errors
+                    raise(e)
+                if _display_attempts<MAX_DISPLAY_ATTEMPTS:
+                    # Try again
+                    _error_string = "Display raised an OSError in display_text! This was attempt {}/{}".format(_display_attempts,MAX_DISPLAY_ATTEMPTS)
+                    logging.error(_error_string)
+                    time.sleep(1.)
+                    pass
+                else:
+                    raise(e)
     
     def _get_text_size_for_box(
         self,
@@ -155,15 +177,16 @@ class DisplayController(object):
         font_size:int=None,
         font_name: str="LiberationSans-Regular.ttf"
     ):
-        
+        print("Trying to display text") 
         _displayed = False
         _display_attempts = 0
-        _max_display_attempts = 3
         # Try to display a few times. 
         while (not _displayed):
+            print("Abount to enter try catch block")
             try:
+                print("Hi from inside")
                 _display_attempts += 1
-
+                print("  About to get text size")
                 if font_size is None:
                     font_size=self._get_text_size_for_box(
                         draw=draw,
@@ -181,26 +204,37 @@ class DisplayController(object):
         # #         with canvas(self.device) as draw:
         #         while (text_width<(width-margin)) and (text_height<(height-margin)):
         #             font_size += 1
+                print("   Making font")
                 font = self.make_font(font_name, font_size)
+                print("   Getting text size")
                 text_width, text_height = draw.textsize(text=text, font=font)
+                print("   drawing!")
                 draw.text(
                     (origin[0]+round((width-text_width)/2), origin[1]+round((height-text_height)/2)),
                     text=text,
                     font=font,
                     fill="white"
                     )
+                print("We should be OK")
                 # If we make it here, the display is OK.
                 _displayed = True
                 # Sometimes we get weird errors when sending multiple commands to the display.
                 # In the tradition of async debugging, let's sleep for a bit and see if it helps.
                 if self.slow_display_update:
                     time.sleep(1.)
-            except Exception as e:
-                if _display_attempts<_max_display_attempts:
+            except OSError as e:
+                print("ERROR: encountered a OSError")
+                logging.error("Encountered a OSError! Error {}".format(e.errno))
+                if ((e.errno != errno.EREMOTEIO) and (e.errno != errno.EIO)):
+                    print("Not one of my errors, reraising")
+                    time.sleep(2.)
+                    raise(e)
+                if _display_attempts<MAX_DISPLAY_ATTEMPTS:
                     # Try again
-                    _error_string = "Display raised an OSError! This was attempt {}/{}".format(_display_attempts,_max_display_attempts)
+                    _error_string = "Display raised an OSError! This was attempt {}/{}".format(_display_attempts,MAX_DISPLAY_ATTEMPTS)
                     logging.error(_error_string)
                     print(_error_string)
+                    time.sleep(1.)
                     pass
                 else:
                     raise(e)
@@ -210,16 +244,37 @@ class DisplayController(object):
         text: str="",
         font_name: str="LiberationSans-Regular.ttf",    
     ):
-        with canvas(self.device) as draw:
-            self._display_text_in_box(
-                draw=draw,
-                text=text,
-                width=self.device.width,
-                height=self.device.height,
-                origin=(0,0),
-                margin=4,
-                font_name=font_name
-            )
+        
+        _displayed = False
+        _display_attempts = 0
+        while _displayed is False and _display_attempts<MAX_DISPLAY_ATTEMPTS:
+            try:
+                _display_attempts += 1
+                with canvas(self.device) as draw:
+                    self._display_text_in_box(
+                        draw=draw,
+                        text=text,
+                        width=self.device.width,
+                        height=self.device.height,
+                        origin=(0,0),
+                        margin=4,
+                        font_name=font_name
+                    )
+                    _displayed = True
+            except OSError as e:
+                if ((e.errno != errno.EREMOTEIO) and (e.errno != errno.EIO)):
+                    # Not one of our errors
+                    raise(e)
+                if _display_attempts<MAX_DISPLAY_ATTEMPTS:
+                    # Try again
+                    _error_string = "Display raised an OSError in display_fullscreen_text! This was attempt {}/{}".format(_display_attempts,MAX_DISPLAY_ATTEMPTS)
+                    logging.error(_error_string)
+                    time.sleep(1.)
+                    pass
+                else:
+                    raise(e)
+
+
     
     def display_observable_data(
         self,
@@ -228,132 +283,168 @@ class DisplayController(object):
         observable_dist: str="",
         font_name: str="LiberationSans-Regular.ttf"
     ):
-        with canvas(self.device) as draw:
-            self._display_text_in_box(
-                draw=draw,
-                text=observable_name,
-                width=self.object_name_width,
-                height=self.object_name_height,
-                origin=self.object_name_origin,
-                margin=self.object_name_margin,
-                font_name=font_name
-            )
-            type_size = self._get_text_size_for_box(
-                draw=draw,
-                text=observable_type,
-                width=self.object_type_width,
-                height=self.object_type_height,
-                origin=self.object_type_origin,
-                margin=self.object_type_margin,
-                font_name=font_name
-            )
-            dist_size = self._get_text_size_for_box(
-                draw=draw,
-                text=observable_dist,
-                width=self.object_dist_width,
-                height=self.object_dist_height,
-                origin=self.object_dist_origin,
-                margin=self.object_dist_margin,
-                font_name=font_name
-            )
-            self._display_text_in_box(
-                draw=draw,
-                text=observable_type,
-                width=self.object_type_width,
-                height=self.object_type_height,
-                origin=self.object_type_origin,
-                margin=self.object_type_margin,
-                font_size=min(type_size, dist_size),
-                font_name=font_name
-            )
-            self._display_text_in_box(
-                draw=draw,
-                text=observable_dist,
-                width=self.object_dist_width,
-                height=self.object_dist_height,
-                origin=self.object_dist_origin,
-                margin=self.object_dist_margin,
-                font_size=min(type_size, dist_size),
-                font_name=font_name
-            )
+        
+        _displayed = False
+        _display_attempts = 0
+        while _displayed is False and _display_attempts<MAX_DISPLAY_ATTEMPTS:
+            try:
+                _display_attempts += 1
+                with canvas(self.device) as draw:
+                    self._display_text_in_box(
+                        draw=draw,
+                        text=observable_name,
+                        width=self.object_name_width,
+                        height=self.object_name_height,
+                        origin=self.object_name_origin,
+                        margin=self.object_name_margin,
+                        font_name=font_name
+                    )
+                    type_size = self._get_text_size_for_box(
+                        draw=draw,
+                        text=observable_type,
+                        width=self.object_type_width,
+                        height=self.object_type_height,
+                        origin=self.object_type_origin,
+                        margin=self.object_type_margin,
+                        font_name=font_name
+                    )
+                    dist_size = self._get_text_size_for_box(
+                        draw=draw,
+                        text=observable_dist,
+                        width=self.object_dist_width,
+                        height=self.object_dist_height,
+                        origin=self.object_dist_origin,
+                        margin=self.object_dist_margin,
+                        font_name=font_name
+                    )
+                    self._display_text_in_box(
+                        draw=draw,
+                        text=observable_type,
+                        width=self.object_type_width,
+                        height=self.object_type_height,
+                        origin=self.object_type_origin,
+                        margin=self.object_type_margin,
+                        font_size=min(type_size, dist_size),
+                        font_name=font_name
+                    )
+                    self._display_text_in_box(
+                        draw=draw,
+                        text=observable_dist,
+                        width=self.object_dist_width,
+                        height=self.object_dist_height,
+                        origin=self.object_dist_origin,
+                        margin=self.object_dist_margin,
+                        font_size=min(type_size, dist_size),
+                        font_name=font_name
+                    )
+                    _displayed = True
+            except OSError as e:
+                if ((e.errno != errno.EREMOTEIO) and (e.errno != errno.EIO)):
+                    # Not one of our errors
+                    raise(e)
+                if _display_attempts<MAX_DISPLAY_ATTEMPTS:
+                    # Try again
+                    _error_string = "Display raised an OSError in display_observable_data! This was attempt {}/{}".format(_display_attempts,MAX_DISPLAY_ATTEMPTS)
+                    logging.error(_error_string)
+                    time.sleep(1.)
+                    pass
+                else:
+                    raise(e)
 
     def display_calibration_data(
         self,
         calibration_data: tuple=(0,0,0,0),
         font_name: str="LiberationSans-Regular.ttf"
     ):
-        with canvas(self.device) as draw:
-            calibration_title_width  = self.device.width
-            calibration_title_height = round(self.device.height/3)
-            calibration_title_origin = (0,0)
-            calibration_title_margin = 4
-            
-            self._display_text_in_box(
-                draw=draw,
-                text="Calibrazione",
-                width=calibration_title_width,
-                height=calibration_title_height,
-                origin=calibration_title_origin,
-                margin=calibration_title_margin,
-                font_name=font_name
-            )
-#             self.object_dist_width  = self.device.width-round(self.device.width)/2
-#             self.object_dist_height = self.device.height-self.object_name_height
-#             self.object_dist_origin = (self.object_type_width+1,round(self.device.height*2/3)+1)
-#             self.object_dist_margin = 4
-            #sys, gyro, accel, and mag
-            data_width  = round(self.device.width/2)
-            data_height = round((self.device.height-calibration_title_height)/2)
-            data_size = self._get_text_size_for_box(
-                draw=draw,
-                text="Sys: {}/3".format(calibration_data[0]),
-                width= data_width,
-                height=data_height,
-                origin=(0,calibration_title_height),
-                margin=4,
-                font_name=font_name
-            )
-            self._display_text_in_box(
-                draw=draw,
-                text="Sys: {}/3".format(calibration_data[0]),
-                width= data_width,
-                height=data_height,
-                origin=(0,calibration_title_height),
-                margin=4,
-                font_size=data_size,
-                font_name=font_name
-            )
-            self._display_text_in_box(
-                draw=draw,
-                text="Gyr: {}/3".format(calibration_data[1]),
-                width= data_width,
-                height=data_height,
-                origin=(0,calibration_title_height+data_height),
-                margin=4,
-                font_size=data_size,
-                font_name=font_name
-            )
-            self._display_text_in_box(
-                draw=draw,
-                text="Acc: {}/3".format(calibration_data[2]),
-                width= data_width,
-                height=data_height,
-                origin=(data_width,calibration_title_height),
-                margin=4,
-                font_size=data_size,
-                font_name=font_name
-            )
-            self._display_text_in_box(
-                draw=draw,
-                text="Mag: {}/3".format(calibration_data[3]),
-                width= data_width,
-                height=data_height,
-                origin=(data_width,calibration_title_height+data_height),
-                margin=4,
-                font_size=data_size,
-                font_name=font_name
-            )
-
+        
+        _displayed = False
+        _display_attempts = 0
+        while _displayed is False and _display_attempts<MAX_DISPLAY_ATTEMPTS:
+            try:
+                with canvas(self.device) as draw:
+                    calibration_title_width  = self.device.width
+                    calibration_title_height = round(self.device.height/3)
+                    calibration_title_origin = (0,0)
+                    calibration_title_margin = 4
+                    
+                    self._display_text_in_box(
+                        draw=draw,
+                        text="Calibrazione",
+                        width=calibration_title_width,
+                        height=calibration_title_height,
+                        origin=calibration_title_origin,
+                        margin=calibration_title_margin,
+                        font_name=font_name
+                    )
+        #             self.object_dist_width  = self.device.width-round(self.device.width)/2
+        #             self.object_dist_height = self.device.height-self.object_name_height
+        #             self.object_dist_origin = (self.object_type_width+1,round(self.device.height*2/3)+1)
+        #             self.object_dist_margin = 4
+                    #sys, gyro, accel, and mag
+                    data_width  = round(self.device.width/2)
+                    data_height = round((self.device.height-calibration_title_height)/2)
+                    data_size = self._get_text_size_for_box(
+                        draw=draw,
+                        text="Sys: {}/3".format(calibration_data[0]),
+                        width= data_width,
+                        height=data_height,
+                        origin=(0,calibration_title_height),
+                        margin=4,
+                        font_name=font_name
+                    )
+                    self._display_text_in_box(
+                        draw=draw,
+                        text="Sys: {}/3".format(calibration_data[0]),
+                        width= data_width,
+                        height=data_height,
+                        origin=(0,calibration_title_height),
+                        margin=4,
+                        font_size=data_size,
+                        font_name=font_name
+                    )
+                    self._display_text_in_box(
+                        draw=draw,
+                        text="Gyr: {}/3".format(calibration_data[1]),
+                        width= data_width,
+                        height=data_height,
+                        origin=(0,calibration_title_height+data_height),
+                        margin=4,
+                        font_size=data_size,
+                        font_name=font_name
+                    )
+                    self._display_text_in_box(
+                        draw=draw,
+                        text="Acc: {}/3".format(calibration_data[2]),
+                        width= data_width,
+                        height=data_height,
+                        origin=(data_width,calibration_title_height),
+                        margin=4,
+                        font_size=data_size,
+                        font_name=font_name
+                    )
+                    self._display_text_in_box(
+                        draw=draw,
+                        text="Mag: {}/3".format(calibration_data[3]),
+                        width= data_width,
+                        height=data_height,
+                        origin=(data_width,calibration_title_height+data_height),
+                        margin=4,
+                        font_size=data_size,
+                        font_name=font_name
+                    )
+                    _displayed = True
+            except OSError as e:
+                if ((e.errno != errno.EREMOTEIO) and (e.errno != errno.EIO)):
+                    # Not one of our errors
+                    raise(e)
+                if _display_attempts<MAX_DISPLAY_ATTEMPTS:
+                    # Try again
+                    _error_string = "Display raised an OSError in display_calibration_data! This was attempt {}/{}".format(_display_attempts,MAX_DISPLAY_ATTEMPTS)
+                    logging.error(_error_string)
+                    time.sleep(1.)
+                    pass
+                else:
+                    raise(e)
     
     def make_font(self, name, size):
         DATA_PATH = os.environ.get("CELESTIAL_COMPASS_DATA")
